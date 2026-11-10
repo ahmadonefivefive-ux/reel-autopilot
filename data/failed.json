@@ -103,5 +103,20 @@
     "url": "https://www.youtube.com/shorts/Vpd0yDwtA-o",
     "error": "YouTube's bot wall ('Sign in to confirm you're not a bot') blocked EVERY attempt this run — the IP/session is blocked, not the video. Fix: export a FRESH cookies.txt with the incognito method (see 'Troubleshooting' in SETUP.md) and update the YOUTUBE_COOKIES secret. Last error: ERROR: [youtube] Vpd0yDwtA-o: Sign in to confirm you’re not a bot. This helps protect our community. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-d",
     "at": "2026-11-10 13:40 UTC"
+  },
+  {
+    "url": "https://www.youtube.com/shorts/l9P7vKbpA9s",
+    "error": "download failed (tried 8 player clients): ERROR: [youtube] l9P7vKbpA9s: Sign in to confirm you’re not a bot. This helps protect our community. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies. Also see  https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies  for tips on effectively exporting Y",
+    "at": "2026-11-10 19:29 UTC"
+  },
+  {
+    "url": "https://www.youtube.com/shorts/G-DwKhSPu8M",
+    "error": "download failed (tried 6 player clients): ERROR: unable to download video data: HTTP Error 403: Forbidden",
+    "at": "2026-11-10 19:29 UTC"
+  },
+  {
+    "url": "https://www.youtube.com/shorts/-c3YRPnB2Os",
+    "error": "YouTube's bot wall ('Sign in to confirm you're not a bot') blocked EVERY attempt this run — the IP/session is blocked, not the video. Fix: export a FRESH cookies.txt with the incognito method (see 'Troubleshooting' in SETUP.md) and update the YOUTUBE_COOKIES secret. Last error: ERROR: [youtube] -c3YRPnB2Os: Sign in to confirm you’re not a bot. This helps protect our community. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-d",
+    "at": "2026-11-10 19:29 UTC"
   }
 ]
