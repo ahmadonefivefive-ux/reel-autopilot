@@ -1,4 +1,3 @@
-# Queue is empty. Paste YouTube links here, one per line.
 https://www.youtube.com/shorts/l9P7vKbpA9s
 https://www.youtube.com/shorts/G-DwKhSPu8M
 https://www.youtube.com/shorts/-c3YRPnB2Os
@@ -659,7 +658,6 @@ https://www.youtube.com/shorts/cLHP2_hDy-M
 https://www.youtube.com/shorts/wzSc5izungo
 https://www.youtube.com/shorts/RtimtD-4Kbs
 https://www.youtube.com/shorts/M-bVmJD1lzs
-https://www.youtube.com/shorts/FUlKjWABaYo
 https://www.youtube.com/shorts/-WhTnUVkR3I
 https://www.youtube.com/shorts/i30zdK2h6Yc
 https://www.youtube.com/shorts/ZA7Pdo6fuyk
@@ -1010,25 +1008,6 @@ https://www.youtube.com/shorts/fuH25xN4e70
 https://www.youtube.com/shorts/CnSnH27dD1A
 https://www.youtube.com/shorts/JaE2-3YsVKg
 https://www.youtube.com/shorts/iOPty_w2Pto
-https://www.youtube.com/shorts/aHhtVV91-m4
-https://www.youtube.com/shorts/dKzaOMclrFg
-https://www.youtube.com/shorts/JGadGSne_zg
-https://www.youtube.com/shorts/0jNPy8QC6Sw
-https://www.youtube.com/shorts/pmbN4bkjYQY
-https://www.youtube.com/shorts/cxkdyJGLZs4
-https://www.youtube.com/shorts/sDkPGMkIVNQ
-https://www.youtube.com/shorts/b4ZUnh8sx5U
-https://www.youtube.com/shorts/jMqIvaFVzsI
-https://www.youtube.com/shorts/k8VO-OUzYdY
-https://www.youtube.com/shorts/RlajOVPSeA4
-https://www.youtube.com/shorts/QZp6hNHhMUs
-https://www.youtube.com/shorts/POw7HBWZbYY
-https://www.youtube.com/shorts/f3x3Vit3n_0
-https://www.youtube.com/shorts/Nm5bPCFy3fM
-https://www.youtube.com/shorts/iCfRIYiVyLI
-https://www.youtube.com/shorts/lW5OcrjTdSE
-https://www.youtube.com/shorts/SbwpmO_x_M8
-https://www.youtube.com/shorts/gdqaKXQsRxM
 https://www.youtube.com/shorts/idTJa65fbRM
 https://www.youtube.com/shorts/Yv9ppsYN5Lw
 https://www.youtube.com/shorts/56GhuroEjfA
