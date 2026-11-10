@@ -23,5 +23,65 @@
     "url": "https://www.youtube.com/shorts/c6UJ11dkVx0",
     "error": "download failed (tried 6 player clients): ERROR: You have requested merging of multiple formats but ffmpeg is not installed. Aborting due to --abort-on-error",
     "at": "2026-11-10 09:20 UTC"
+  },
+  {
+    "url": "https://www.youtube.com/shorts/l9P7vKbpA9s",
+    "error": "YouTube's bot check blocked the download — the YOUTUBE_COOKIES secret is probably stale (YouTube retires a session after it gets used from GitHub's servers in another country) or partial. Fix: export a FRESH cookies.txt from a signed-in youtube.com tab, update the secret, and re-run. Last client error: ERROR: [youtube] l9P7vKbpA9s: Sign in to confirm you’re not a bot. This helps protect our community. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/",
+    "at": "2026-11-10 10:18 UTC"
+  },
+  {
+    "url": "https://www.youtube.com/shorts/G-DwKhSPu8M",
+    "error": "YouTube's bot check blocked the download — the YOUTUBE_COOKIES secret is probably stale (YouTube retires a session after it gets used from GitHub's servers in another country) or partial. Fix: export a FRESH cookies.txt from a signed-in youtube.com tab, update the secret, and re-run. Last client error: ERROR: [youtube] G-DwKhSPu8M: Sign in to confirm you’re not a bot. This helps protect our community. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/",
+    "at": "2026-11-10 10:18 UTC"
+  },
+  {
+    "url": "https://www.youtube.com/shorts/-c3YRPnB2Os",
+    "error": "YouTube's bot check blocked the download — the YOUTUBE_COOKIES secret is probably stale (YouTube retires a session after it gets used from GitHub's servers in another country) or partial. Fix: export a FRESH cookies.txt from a signed-in youtube.com tab, update the secret, and re-run. Last client error: ERROR: [youtube] -c3YRPnB2Os: Sign in to confirm you’re not a bot. This helps protect our community. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/",
+    "at": "2026-11-10 10:18 UTC"
+  },
+  {
+    "url": "https://www.youtube.com/shorts/Vpd0yDwtA-o",
+    "error": "YouTube's bot check blocked the download — the YOUTUBE_COOKIES secret is probably stale (YouTube retires a session after it gets used from GitHub's servers in another country) or partial. Fix: export a FRESH cookies.txt from a signed-in youtube.com tab, update the secret, and re-run. Last client error: ERROR: [youtube] Vpd0yDwtA-o: Sign in to confirm you’re not a bot. This helps protect our community. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/",
+    "at": "2026-11-10 10:18 UTC"
+  },
+  {
+    "url": "https://www.youtube.com/shorts/4rr03T2j_-E",
+    "error": "YouTube's bot check blocked the download — the YOUTUBE_COOKIES secret is probably stale (YouTube retires a session after it gets used from GitHub's servers in another country) or partial. Fix: export a FRESH cookies.txt from a signed-in youtube.com tab, update the secret, and re-run. Last client error: ERROR: [youtube] 4rr03T2j_-E: Sign in to confirm you’re not a bot. This helps protect our community. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/",
+    "at": "2026-11-10 10:18 UTC"
+  },
+  {
+    "url": "https://www.youtube.com/shorts/RkZBYJ6mySQ",
+    "error": "YouTube's bot check blocked the download — the YOUTUBE_COOKIES secret is probably stale (YouTube retires a session after it gets used from GitHub's servers in another country) or partial. Fix: export a FRESH cookies.txt from a signed-in youtube.com tab, update the secret, and re-run. Last client error: ERROR: [youtube] RkZBYJ6mySQ: Sign in to confirm you’re not a bot. This helps protect our community. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/",
+    "at": "2026-11-10 10:18 UTC"
+  },
+  {
+    "url": "https://www.youtube.com/shorts/VRXCgW3W1tE",
+    "error": "YouTube's bot check blocked the download — the YOUTUBE_COOKIES secret is probably stale (YouTube retires a session after it gets used from GitHub's servers in another country) or partial. Fix: export a FRESH cookies.txt from a signed-in youtube.com tab, update the secret, and re-run. Last client error: ERROR: [youtube] VRXCgW3W1tE: Sign in to confirm you’re not a bot. This helps protect our community. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/",
+    "at": "2026-11-10 10:18 UTC"
+  },
+  {
+    "url": "https://www.youtube.com/shorts/-qVXuIl2r0Y",
+    "error": "YouTube's bot check blocked the download — the YOUTUBE_COOKIES secret is probably stale (YouTube retires a session after it gets used from GitHub's servers in another country) or partial. Fix: export a FRESH cookies.txt from a signed-in youtube.com tab, update the secret, and re-run. Last client error: ERROR: [youtube] -qVXuIl2r0Y: Sign in to confirm you’re not a bot. This helps protect our community. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/",
+    "at": "2026-11-10 10:18 UTC"
+  },
+  {
+    "url": "https://www.youtube.com/shorts/P1zY6JKtxDI",
+    "error": "YouTube's bot check blocked the download — the YOUTUBE_COOKIES secret is probably stale (YouTube retires a session after it gets used from GitHub's servers in another country) or partial. Fix: export a FRESH cookies.txt from a signed-in youtube.com tab, update the secret, and re-run. Last client error: ERROR: [youtube] P1zY6JKtxDI: Sign in to confirm you’re not a bot. This helps protect our community. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/",
+    "at": "2026-11-10 10:18 UTC"
+  },
+  {
+    "url": "https://www.youtube.com/shorts/hikTYcGD_Pg",
+    "error": "YouTube's bot check blocked the download — the YOUTUBE_COOKIES secret is probably stale (YouTube retires a session after it gets used from GitHub's servers in another country) or partial. Fix: export a FRESH cookies.txt from a signed-in youtube.com tab, update the secret, and re-run. Last client error: ERROR: [youtube] hikTYcGD_Pg: Sign in to confirm you’re not a bot. This helps protect our community. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/",
+    "at": "2026-11-10 10:19 UTC"
+  },
+  {
+    "url": "https://www.youtube.com/shorts/n-TPuHOwUo4",
+    "error": "YouTube's bot check blocked the download — the YOUTUBE_COOKIES secret is probably stale (YouTube retires a session after it gets used from GitHub's servers in another country) or partial. Fix: export a FRESH cookies.txt from a signed-in youtube.com tab, update the secret, and re-run. Last client error: ERROR: [youtube] n-TPuHOwUo4: Sign in to confirm you’re not a bot. This helps protect our community. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/",
+    "at": "2026-11-10 10:19 UTC"
+  },
+  {
+    "url": "https://www.youtube.com/shorts/8ceFUljHWWY",
+    "error": "YouTube's bot check blocked the download — the YOUTUBE_COOKIES secret is probably stale (YouTube retires a session after it gets used from GitHub's servers in another country) or partial. Fix: export a FRESH cookies.txt from a signed-in youtube.com tab, update the secret, and re-run. Last client error: ERROR: [youtube] 8ceFUljHWWY: Sign in to confirm you’re not a bot. This helps protect our community. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/",
+    "at": "2026-11-10 10:19 UTC"
   }
 ]
