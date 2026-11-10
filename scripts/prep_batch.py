@@ -113,6 +113,7 @@ def main():
     print(f"Rendering up to {len(to_render)} video(s) this run "
           f"(border + channel name), saving to Drive.")
 
+    WORK.mkdir(exist_ok=True)  # scratch space for downloads/renders
     done = []
     for url in to_render:
         print(f"\n=== {url}")
