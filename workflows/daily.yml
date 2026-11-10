@@ -1,0 +1,49 @@
+name: Daily publish (stash to YouTube)
+
+# Runs every day at 05:00 UTC. Takes the 1-5 OLDEST finished videos from
+# the Google Drive stash (filled by "Prepare videos") and uploads them to
+# YouTube, set to go PUBLIC automatically at your chosen posting hours.
+# Each uploaded video is deleted from Drive right after — storage is
+# freed and reused, like a conveyor belt.
+# You can also trigger it manually: Actions tab -> this workflow -> Run workflow.
+
+on:
+  schedule:
+    - cron: "0 5 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: data-write
+  cancel-in-progress: false
+
+jobs:
+  batch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r scripts/requirements.txt
+
+      - name: Publish today's videos (stash -> YouTube -> free Drive)
+        env:
+          YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
+          YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+          YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
+        run: python scripts/run_batch.py
+
+      - name: Save results
+        run: |
+          git config user.name "reel-autopilot-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data
+          git commit -m "daily publish $(date -u '+%Y-%m-%d %H:%M')" || echo "no changes to commit"
+          git push
