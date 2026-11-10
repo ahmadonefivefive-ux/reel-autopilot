@@ -1,7 +1,7 @@
 {
-  "channel_name": "My Channel",
+  "channel_name": "CineSparks",
   "videos_per_day": 3,
-  "border_px": 20,
+  "border_px": 8,
   "name_position": "top",
   "name_fontsize": 54,
   "title_template": "{title}",
