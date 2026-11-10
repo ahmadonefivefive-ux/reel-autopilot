@@ -1,1 +1,27 @@
-[]
+[
+  {
+    "url": "https://www.youtube.com/shorts/CwDnaKROPrk",
+    "error": "download failed (tried 6 player clients): ERROR: You have requested merging of multiple formats but ffmpeg is not installed. Aborting due to --abort-on-error",
+    "at": "2026-11-10 09:19 UTC"
+  },
+  {
+    "url": "https://www.youtube.com/shorts/vOAukG2av7U",
+    "error": "download failed (tried 6 player clients): ERROR: You have requested merging of multiple formats but ffmpeg is not installed. Aborting due to --abort-on-error",
+    "at": "2026-11-10 09:19 UTC"
+  },
+  {
+    "url": "https://www.youtube.com/shorts/BPdhl9r3D3Y",
+    "error": "download failed (tried 6 player clients): ERROR: You have requested merging of multiple formats but ffmpeg is not installed. Aborting due to --abort-on-error",
+    "at": "2026-11-10 09:19 UTC"
+  },
+  {
+    "url": "https://www.youtube.com/shorts/aeNGUEj5nHc",
+    "error": "download failed (tried 6 player clients): ERROR: You have requested merging of multiple formats but ffmpeg is not installed. Aborting due to --abort-on-error",
+    "at": "2026-11-10 09:20 UTC"
+  },
+  {
+    "url": "https://www.youtube.com/shorts/c6UJ11dkVx0",
+    "error": "download failed (tried 6 player clients): ERROR: You have requested merging of multiple formats but ffmpeg is not installed. Aborting due to --abort-on-error",
+    "at": "2026-11-10 09:20 UTC"
+  }
+]
