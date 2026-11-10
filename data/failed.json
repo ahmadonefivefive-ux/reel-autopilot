@@ -1,1 +1,27 @@
-[]
+[
+  {
+    "url": "https://www.youtube.com/shorts/CwDnaKROPrk",
+    "error": "download failed (tried 6 player clients): ERROR: [youtube] CwDnaKROPrk: Sign in to confirm you’re not a bot. This helps protect our community. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies. Also see  https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies  for tips on effectively exporting Y",
+    "at": "2026-11-10 08:28 UTC"
+  },
+  {
+    "url": "https://www.youtube.com/shorts/vOAukG2av7U",
+    "error": "download failed (tried 6 player clients): ERROR: [youtube] vOAukG2av7U: Sign in to confirm you’re not a bot. This helps protect our community. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies. Also see  https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies  for tips on effectively exporting Y",
+    "at": "2026-11-10 08:28 UTC"
+  },
+  {
+    "url": "https://www.youtube.com/shorts/BPdhl9r3D3Y",
+    "error": "download failed (tried 6 player clients): ERROR: [youtube] BPdhl9r3D3Y: Sign in to confirm you’re not a bot. This helps protect our community. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies. Also see  https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies  for tips on effectively exporting Y",
+    "at": "2026-11-10 08:29 UTC"
+  },
+  {
+    "url": "https://www.youtube.com/shorts/aeNGUEj5nHc",
+    "error": "download failed (tried 6 player clients): ERROR: [youtube] aeNGUEj5nHc: Sign in to confirm you’re not a bot. This helps protect our community. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies. Also see  https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies  for tips on effectively exporting Y",
+    "at": "2026-11-10 08:29 UTC"
+  },
+  {
+    "url": "https://www.youtube.com/shorts/c6UJ11dkVx0",
+    "error": "download failed (tried 6 player clients): ERROR: [youtube] c6UJ11dkVx0: Sign in to confirm you’re not a bot. This helps protect our community. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies. Also see  https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies  for tips on effectively exporting Y",
+    "at": "2026-11-10 08:29 UTC"
+  }
+]
