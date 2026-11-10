@@ -1,0 +1,6 @@
+# Paste YouTube links here, one per line. Lines starting with # are ignored.
+# Every day the bot takes the first links from this list
+# (up to "videos_per_day" from data/settings.json) and uploads them.
+# Example:
+# https://www.youtube.com/shorts/ABC123xyz
+# https://www.youtube.com/watch?v=ABC123xyz

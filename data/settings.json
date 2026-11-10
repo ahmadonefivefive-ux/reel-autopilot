@@ -1,0 +1,15 @@
+{
+  "channel_name": "My Channel",
+  "videos_per_day": 3,
+  "border_px": 20,
+  "name_position": "top",
+  "name_fontsize": 54,
+  "title_template": "{title}",
+  "description_template": "{title}\n\nvia {channel_name}\nsource: {source_url}",
+  "privacy": "public",
+  "timezone": "America/New_York",
+  "post_times": ["12:00", "16:00", "20:00", "18:00", "22:00"],
+  "stash_target": 25,
+  "drive_free_reserve_mb": 2000,
+  "ai_style": "viral"
+}

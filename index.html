@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reel Autopilot — free daily reels uploader</title>
+<style>
+  :root {
+    --bg: #0b0f14; --panel: #111826; --panel2: #0e1522;
+    --border: #1f2a3a; --text: #e6edf3; --muted: #8b98a9;
+    --accent: #34d399; --accent-dark: #0d9668; --red: #f87171; --amber: #fbbf24;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: ui-sans-serif, system-ui, "Segoe UI", Roboto, Arial, sans-serif;
+    line-height: 1.5;
+  }
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 22px; border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; background: rgba(11,15,20,.92); backdrop-filter: blur(6px); z-index: 5;
+  }
+  .logo { font-weight: 800; font-size: 19px; letter-spacing: .3px; }
+  .logo span { color: var(--accent); }
+  .head-right { display: flex; align-items: center; gap: 12px; }
+  .repochip { color: var(--muted); font-size: 13px; }
+  main { max-width: 980px; margin: 0 auto; padding: 22px 18px 60px; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 18px; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; }
+  .card .num { font-size: 26px; font-weight: 800; }
+  .card .lbl { color: var(--muted); font-size: 12.5px; text-transform: uppercase; letter-spacing: .6px; }
+  .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 18px; margin-bottom: 18px; }
+  .panel h2 { margin: 0 0 12px; font-size: 16px; }
+  textarea, input, select {
+    width: 100%; background: var(--panel2); color: var(--text);
+    border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px;
+    font: inherit; outline: none;
+  }
+  textarea { min-height: 110px; resize: vertical; font-family: ui-monospace, Consolas, monospace; font-size: 13px; }
+  textarea:focus, input:focus, select:focus { border-color: var(--accent-dark); }
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 12px; }
+  label { display: block; color: var(--muted); font-size: 12.5px; }
+  label input, label select { margin-top: 5px; color: var(--text); }
+  button {
+    background: var(--panel2); color: var(--text); border: 1px solid var(--border);
+    border-radius: 10px; padding: 9px 16px; font: inherit; font-weight: 600; cursor: pointer;
+  }
+  button:hover { border-color: var(--accent-dark); }
+  button.primary { background: var(--accent); color: #04150e; border: none; }
+  button.primary:hover { background: #2bb584; }
+  button:disabled { opacity: .5; cursor: wait; }
+  .row { display: flex; align-items: center; gap: 14px; margin-top: 10px; flex-wrap: wrap; }
+  .hint { color: var(--muted); font-size: 12.5px; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  ol.queue { margin: 0; padding-left: 22px; }
+  ol.queue li { padding: 3px 0; word-break: break-all; font-size: 13.5px; }
+  .uploads { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 14px; }
+  .up {
+    background: var(--panel2); border: 1px solid var(--border); border-radius: 12px;
+    overflow: hidden; display: flex; flex-direction: column;
+  }
+  .up img { width: 100%; aspect-ratio: 9/16; object-fit: cover; background: #000; display: block; }
+  .up .body { padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; }
+  .up .t { font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .up .d { color: var(--muted); font-size: 12px; }
+  .badge { align-self: flex-start; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+  .badge.hot { background: #052e1c; color: var(--accent); border: 1px solid var(--accent-dark); }
+  .badge.some { background: #2b230b; color: var(--amber); border: 1px solid #715209; }
+  .badge.none { background: #2b1212; color: var(--red); border: 1px solid #6b2222; }
+  .badge.wait { background: #14202e; color: #7ab0e0; border: 1px solid #2b4a6b; }
+  .empty { color: var(--muted); font-size: 13.5px; }
+  .failed li { color: var(--red); font-size: 13px; word-break: break-all; }
+  footer { text-align: center; color: var(--muted); font-size: 12.5px; padding: 26px 16px 40px; }
+  .modal { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: flex; align-items: center; justify-content: center; z-index: 10; }
+  .modal.hidden { display: none; }
+  .modal-box { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 22px; max-width: 560px; width: 92%; }
+  .modal-box h3 { margin-top: 0; }
+  .modal-box ol { font-size: 13.5px; color: var(--text); }
+  .modal-box .muted { color: var(--muted); font-size: 12.5px; }
+  .ok { color: var(--accent); font-weight: 700; }
+  .err { color: var(--red); font-weight: 700; }
+  #status { margin-left: auto; font-size: 13px; }
+  code { background: var(--panel2); border: 1px solid var(--border); border-radius: 6px; padding: 1px 6px; font-size: 12.5px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">▶ <span>Reel</span> Autopilot</div>
+  <div class="head-right">
+    <span class="repochip" id="repoLabel"></span>
+    <button id="btnRunNow" title="Trigger the upload batch right now">⚡ Run now</button>
+    <button id="btnToken">🔗 Connect GitHub</button>
+  </div>
+</header>
+
+<main>
+  <div class="cards">
+    <div class="card"><div class="num" id="cardQueue">–</div><div class="lbl">In queue</div></div>
+    <div class="card"><div class="num" id="cardStash">–</div><div class="lbl">Ready in Drive</div></div>
+    <div class="card"><div class="num" id="cardUploaded">–</div><div class="lbl">Uploaded</div></div>
+    <div class="card"><div class="num" id="cardViews">–</div><div class="lbl">Total views</div></div>
+    <div class="card"><div class="num" id="cardPerDay">–</div><div class="lbl">Uploads / day</div></div>
+  </div>
+
+  <section class="panel">
+    <h2>📥 Paste links (as many as you want, one per line)</h2>
+    <textarea id="linksBox" placeholder="https://www.youtube.com/shorts/xxxxxxxxxxx&#10;https://www.youtube.com/watch?v=xxxxxxxxxxx&#10;https://www.youtube.com/watch?v=xxxxxxxxxxx"></textarea>
+    <div class="row">
+      <button class="primary" id="btnAdd">Add to queue</button>
+      <span id="addStatus"></span>
+    </div>
+    <p class="hint" id="addHint"></p>
+  </section>
+
+  <section class="panel">
+    <h2>⚙️ Settings</h2>
+    <div class="grid2">
+      <label>Channel name (shown on video)
+        <input id="setChannel" placeholder="My Channel">
+      </label>
+      <label>Videos per day (1–5)
+        <select id="setPerDay"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select>
+      </label>
+      <label>Black border size (px, small wall around video)
+        <input id="setBorder" type="number" min="0" max="80">
+      </label>
+      <label>Channel name position
+        <select id="setPosition"><option value="top">Top</option><option value="bottom">Bottom</option></select>
+      </label>
+      <label>Title template
+        <input id="setTitleTpl" placeholder="{title}">
+      </label>
+      <label>Privacy
+        <select id="setPrivacy"><option>public</option><option>unlisted</option><option>private</option></select>
+      </label>
+      <label>Viewer timezone (when videos go live)
+        <input id="setTz" placeholder="America/New_York">
+      </label>
+      <label>Posting times — best hour first, comma separated
+        <input id="setTimes" placeholder="12:00, 16:00, 20:00">
+      </label>
+      <label>Ready videos to keep in Drive (conveyor belt)
+        <input id="setStash" type="number" min="1" max="500">
+      </label>
+      <label>Title & description writing
+        <select id="setAiStyle">
+          <option value="viral">AI — viral / curiosity hooks</option>
+          <option value="neutral">AI — neutral / factual</option>
+          <option value="cinematic">AI — cinematic / dramatic</option>
+          <option value="off">Off — keep original title</option>
+        </select>
+      </label>
+    </div>
+    <div class="row">
+      <button class="primary" id="btnSaveSettings">Save settings</button>
+      <span id="setSaveStatus"></span>
+    </div>
+    <p class="hint">Titles can use <code>{title}</code> <code>{channel_name}</code> <code>{source_url}</code>. The 1st video of the day goes live at the 1st posting time, the 2nd at the 2nd, and so on. Leave posting times empty to publish immediately at the run time. The prep robot keeps rendering ahead until "ready videos" are stashed in Drive — each one is deleted from Drive right after it uploads, so the space keeps getting reused. AI writing needs the GEMINI_API_KEY secret (free, see SETUP.md) — without it, videos keep their original title.</p>
+  </section>
+
+  <section class="panel">
+    <h2>⏳ Queue <span class="hint" id="queueMeta"></span></h2>
+    <ol class="queue" id="queueList"></ol>
+    <p class="empty" id="queueEmpty">Queue is empty — paste some links above.</p>
+  </section>
+
+  <section class="panel">
+    <h2>🎬 Uploaded videos — getting views or not</h2>
+    <div class="uploads" id="uploadsGrid"></div>
+    <p class="empty" id="uploadsEmpty">Nothing uploaded yet. The first daily run will show up here.</p>
+  </section>
+
+  <section class="panel" id="failedPanel" style="display:none">
+    <h2>⚠️ Failed links</h2>
+    <ul class="failed" id="failedList"></ul>
+  </section>
+</main>
+
+<footer>
+  Runs free on GitHub Actions · videos go live at your chosen hours · view stats refresh every 6 hours<br>
+  Only repost videos you have the rights to. You are responsible for your channel and its content.
+</footer>
+
+<div class="modal hidden" id="modal">
+  <div class="modal-box">
+    <h3>Connect GitHub (optional, unlocks in-page editing)</h3>
+    <p class="muted">Lets this page add links & save settings directly. Without a token you can still edit <code>data/queue.txt</code> and <code>data/settings.json</code> on github.com.</p>
+    <ol>
+      <li>Go to <a href="https://github.com/settings/personal-access-tokens/new" target="_blank">GitHub → Developer settings → Fine-grained tokens</a></li>
+      <li>Token name: <code>reel-dashboard</code> · Repository access: <b>Only select repositories</b> → pick this repo</li>
+      <li>Permissions: <b>Contents → Read and write</b> (add <b>Actions → Read and write</b> for the ⚡Run now button)</li>
+      <li>Generate, copy the token (<code>github_pat_…</code>) and paste it below</li>
+    </ol>
+    <label>GitHub token
+      <input id="tokenInput" type="password" placeholder="github_pat_..." style="margin-top:5px">
+    </label>
+    <label style="margin-top:10px">Repository (owner/name) — only needed if this page is on a custom domain
+      <input id="repoInput" placeholder="yourname/reel-autopilot" style="margin-top:5px">
+    </label>
+    <div class="row">
+      <button class="primary" id="btnTokenSave">Save</button>
+      <button id="btnTokenClear">Disconnect</button>
+      <button id="btnTokenClose">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+const S = {
+  owner: null, repo: null, branch: 'main',
+  token: localStorage.getItem('gh_token') || '',
+  repoFull: localStorage.getItem('repo_full') || '',
+  settings: {}, queue: [], uploaded: [], stats: {}, failed: []
+};
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* ---------- repo detection (user.github.io/repo) ---------- */
+function detectRepo() {
+  if (S.repoFull) { const [o, r] = S.repoFull.split('/'); return [o.trim(), r.trim()]; }
+  const host = location.hostname;
+  if (!host.endsWith('.github.io')) return [null, null];
+  const owner = host.split('.')[0];
+  const parts = location.pathname.split('/').filter(Boolean);
+  if (!parts.length) return [owner, owner + '.github.io'];
+  return [owner, parts[parts.length - 1].replace(/\.html?$/, '')];
+}
+
+/* ---------- data loading ---------- */
+async function loadData() {
+  const bust = '?t=' + Date.now();
+  const get = async (path, fallback) => {
+    try {
+      const r = await fetch(path + bust);
+      if (!r.ok) throw new Error(r.status);
+      return path.endsWith('.json') ? await r.json() : await r.text();
+    } catch { return fallback; }
+  };
+  S.settings = await get('data/settings.json', {});
+  S.stats   = await get('data/stats.json', {});
+  S.uploaded = await get('data/uploaded.json', []);
+  S.failed  = await get('data/failed.json', []);
+  S.stash   = await get('data/stash.json', {});
+  const txt = await get('data/queue.txt', '');
+  S.queue = txt.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#'));
+}
+
+/* ---------- GitHub Contents API ---------- */
+const apiURL = (path) => `https://api.github.com/repos/${S.owner}/${S.repo}/contents/${path}`;
+const apiHeaders = () => {
+  const h = { 'Accept': 'application/vnd.github+json' };
+  if (S.token) h.Authorization = 'Bearer ' + S.token;
+  return h;
+};
+async function ghGet(path) {
+  const r = await fetch(`${apiURL(path)}?ref=${S.branch}`, { headers: apiHeaders(), cache: 'no-store' });
+  if (!r.ok) throw new Error(`GET ${path} → ${r.status} ${r.statusText}`);
+  const j = await r.json();
+  const bytes = Uint8Array.from(atob(j.content.replace(/\s/g, '')), c => c.charCodeAt(0));
+  return { sha: j.sha, text: new TextDecoder().decode(bytes) };
+}
+async function ghPut(path, content, message) {
+  const cur = await ghGet(path);
+  const bytes = new TextEncoder().encode(content);
+  let bin = ''; for (const b of bytes) bin += String.fromCharCode(b);
+  const r = await fetch(apiURL(path), {
+    method: 'PUT', headers: apiHeaders(),
+    body: JSON.stringify({ message, content: btoa(bin), sha: cur.sha, branch: S.branch })
+  });
+  if (!r.ok) { const e = await r.json().catch(() => ({})); throw new Error(e.message || 'PUT failed ' + r.status); }
+}
+
+/* ---------- add links ---------- */
+async function addLinks() {
+  const box = $('linksBox');
+  const status = $('addStatus');
+  const links = box.value.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
+  if (!links.length) return;
+
+  if (!S.token || !S.owner) {
+    status.innerHTML = '<span class="err">Connect a GitHub token first (top-right button), or paste links directly into the queue file on GitHub:</span>';
+    $('addHint').innerHTML = `→ <a href="https://github.com/${esc(S.owner || '')}/${esc(S.repo || '')}/edit/${S.branch}/data/queue.txt" target="_blank">open data/queue.txt for editing</a> (paste links at the end, then Commit changes)`;
+    return;
+  }
+  const btn = $('btnAdd'); btn.disabled = true; status.textContent = 'Adding…';
+  try {
+    const { text } = await ghGet('data/queue.txt');
+    const existing = new Set(text.split('\n').map(l => l.trim()));
+    const fresh = links.filter(l => !existing.has(l));
+    if (!fresh.length) { status.innerHTML = '<span class="ok">All links are already in the queue.</span>'; return; }
+    await ghPut('data/queue.txt',
+      text.replace(/\s*$/, '') + '\n' + fresh.join('\n') + '\n',
+      `dashboard: add ${fresh.length} link(s) to queue`);
+    box.value = '';
+    await loadData(); render();
+    status.innerHTML = `<span class="ok">✓ Added ${fresh.length} link(s). Total in queue: ${S.queue.length}</span>`;
+  } catch (e) {
+    status.innerHTML = `<span class="err">${esc(e.message)}</span>`;
+  } finally { btn.disabled = false; }
+}
+
+/* ---------- save settings ---------- */
+async function saveSettings() {
+  const status = $('setSaveStatus');
+  if (!S.token || !S.owner) {
+    status.innerHTML = '<span class="err">Connect a GitHub token first, or edit <a href="https://github.com/' + esc(S.owner || '') + '/' + esc(S.repo || '') + '/edit/' + S.branch + '/data/settings.json" target="_blank">data/settings.json</a> on GitHub.</span>';
+    return;
+  }
+  const btn = $('btnSaveSettings'); btn.disabled = true; status.textContent = 'Saving…';
+  try {
+    const next = JSON.parse(JSON.stringify(S.settings));
+    next.channel_name = $('setChannel').value.trim();
+    next.videos_per_day = parseInt($('setPerDay').value, 10);
+    next.border_px = Math.max(0, Math.min(80, parseInt($('setBorder').value || '20', 10)));
+    next.name_position = $('setPosition').value;
+    next.title_template = $('setTitleTpl').value || '{title}';
+    next.privacy = $('setPrivacy').value;
+    next.timezone = $('setTz').value.trim() || 'UTC';
+    next.post_times = $('setTimes').value.split(',').map(s => s.trim()).filter(Boolean);
+    next.stash_target = Math.max(1, Math.min(500, parseInt($('setStash').value || '25', 10)));
+    next.ai_style = $('setAiStyle').value;
+    await ghPut('data/settings.json', JSON.stringify(next, null, 2) + '\n', 'dashboard: update settings');
+    status.innerHTML = '<span class="ok">✓ Saved. Applies from the next daily run.</span>';
+    await loadData(); render();
+  } catch (e) {
+    status.innerHTML = `<span class="err">${esc(e.message)}</span>`;
+  } finally { btn.disabled = false; }
+}
+
+/* ---------- run now (needs Actions: write on the token) ---------- */
+async function runNow() {
+  const btn = $('btnRunNow'), label = btn.textContent;
+  if (!S.token || !S.owner) { alert('Connect a GitHub token with Actions permission first (top-right button).'); return; }
+  btn.disabled = true; btn.textContent = 'Starting…';
+  try {
+    const r = await fetch(`https://api.github.com/repos/${S.owner}/${S.repo}/actions/workflows/daily.yml/dispatches`, {
+      method: 'POST',
+      headers: { ...apiHeaders(), 'Accept': 'application/vnd.github+json' },
+      body: JSON.stringify({ ref: S.branch })
+    });
+    if (r.status === 204) {
+      btn.textContent = '✓ Started';
+      setTimeout(() => open(`https://github.com/${S.owner}/${S.repo}/actions`, '_blank'), 600);
+    } else {
+      const e = await r.json().catch(() => ({}));
+      alert('Could not start: ' + (e.message || r.status) + '\n\nMake sure your token has "Actions: Read and write" permission.');
+    }
+  } catch (e) { alert('Could not start: ' + e.message); }
+  finally { btn.disabled = false; setTimeout(() => btn.textContent = label, 1500); }
+}
+
+/* ---------- rendering ---------- */
+function viewBadge(u) {
+  const st = S.stats[u.id];
+  const views = st ? st.views : null;
+  const ts = u.publish_utc || (u.uploaded_at || '').replace(' UTC', 'Z');
+  const t = new Date(ts);
+  const valid = !isNaN(t.getTime());
+  if (valid && t.getTime() > Date.now()) return ['wait', '🗓 scheduled'];
+  const ageH = valid ? (Date.now() - t.getTime()) / 36e5 : 0;
+  if (views === null) return ['wait', '⏳ stats coming'];
+  if (views >= 100) return ['hot', `🔥 ${views.toLocaleString()} views`];
+  if (views > 0) return ['some', `${views.toLocaleString()} views`];
+  if (ageH < 24) return ['wait', '⏳ no views yet'];
+  return ['none', '💤 no views'];
+}
+
+function render() {
+  const totalViews = Object.values(S.stats).reduce((a, v) => a + (v.views || 0), 0);
+  const perDay = S.settings.videos_per_day || 3;
+
+  $('cardQueue').textContent = S.queue.length;
+  $('cardStash').textContent = S.stash.count ?? 0;
+  $('cardUploaded').textContent = S.uploaded.length;
+  $('cardViews').textContent = totalViews.toLocaleString();
+  $('cardPerDay').textContent = perDay;
+
+  // settings inputs
+  $('setChannel').value = S.settings.channel_name || '';
+  $('setPerDay').value = String(Math.min(5, Math.max(1, perDay)));
+  $('setBorder').value = S.settings.border_px ?? 20;
+  $('setPosition').value = S.settings.name_position || 'top';
+  $('setTitleTpl').value = S.settings.title_template || '{title}';
+  $('setPrivacy').value = S.settings.privacy || 'public';
+  $('setTz').value = S.settings.timezone || 'America/New_York';
+  $('setTimes').value = (S.settings.post_times || []).join(', ');
+  $('setStash').value = S.settings.stash_target ?? 25;
+  $('setAiStyle').value = S.settings.ai_style || 'viral';
+
+  // queue
+  const ql = $('queueList');
+  ql.innerHTML = S.queue.map(l => `<li>${esc(l)}</li>`).join('');
+  ql.style.display = S.queue.length ? '' : 'none';
+  $('queueEmpty').style.display = S.queue.length ? 'none' : '';
+  const driveInfo = S.stash.drive_free_mb != null
+    ? ` · ${S.stash.drive_free_mb.toLocaleString()} MB free on Drive` : '';
+  $('queueMeta').textContent =
+    `— next ${Math.min(perDay, Math.max(S.queue.length, 1))} will upload at the next run (${S.queue.length} waiting${driveInfo})`;
+
+  // uploads
+  const grid = $('uploadsGrid');
+  const ups = [...S.uploaded].sort((a, b) => (b.uploaded_at || '').localeCompare(a.uploaded_at || ''));
+  grid.innerHTML = ups.map(u => {
+    const [cls, label] = viewBadge(u);
+    const when = u.publish_at ? `📅 goes live ${u.publish_at}` : (u.uploaded_at || '');
+    return `<div class="up">
+      <a href="https://youtu.be/${esc(u.id)}" target="_blank"><img src="https://i.ytimg.com/vi/${esc(u.id)}/mqdefault.jpg" alt="" loading="lazy"></a>
+      <div class="body">
+        <a class="t" href="https://youtu.be/${esc(u.id)}" target="_blank" title="${esc(u.title)}">${esc(u.title)}</a>
+        <span class="d">${esc(when)}</span>
+        <span class="badge ${cls}">${label}</span>
+      </div>
+    </div>`;
+  }).join('');
+  grid.style.display = ups.length ? '' : 'none';
+  $('uploadsEmpty').style.display = ups.length ? 'none' : '';
+
+  // failed
+  $('failedPanel').style.display = S.failed.length ? '' : 'none';
+  $('failedList').innerHTML = S.failed.slice(-10).reverse()
+    .map(f => `<li>${esc(f.at || '')} — <a href="${esc(f.url)}" target="_blank">${esc(f.url)}</a><br><span class="hint">${esc((f.error || '').slice(0, 160))}</span></li>`)
+    .join('');
+
+  if (S.owner && S.repo) $('repoLabel').textContent = S.owner + '/' + S.repo;
+  $('addHint').innerHTML = '';
+}
+
+/* ---------- token modal ---------- */
+function openModal() { $('tokenInput').value = S.token || ''; $('repoInput').value = S.repoFull || ''; $('modal').classList.remove('hidden'); }
+function saveModal() {
+  S.token = $('tokenInput').value.trim();
+  localStorage.setItem('gh_token', S.token);
+  S.repoFull = $('repoInput').value.trim();
+  localStorage.setItem('repo_full', S.repoFull);
+  [S.owner, S.repo] = detectRepo();
+  $('modal').classList.add('hidden');
+  render();
+}
+
+/* ---------- boot ---------- */
+(async function init() {
+  $('btnAdd').onclick = addLinks;
+  $('btnSaveSettings').onclick = saveSettings;
+  $('btnRunNow').onclick = runNow;
+  $('btnToken').onclick = openModal;
+  $('btnTokenSave').onclick = saveModal;
+  $('btnTokenClose').onclick = () => $('modal').classList.add('hidden');
+  $('btnTokenClear').onclick = () => { localStorage.removeItem('gh_token'); S.token = ''; $('modal').classList.add('hidden'); render(); };
+  $('modal').addEventListener('click', (e) => { if (e.target === $('modal')) $('modal').classList.add('hidden'); });
+
+  [S.owner, S.repo] = detectRepo();
+  await loadData();
+  render();
+})();
+</script>
+</body>
+</html>
