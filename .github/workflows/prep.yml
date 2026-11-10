@@ -1,0 +1,74 @@
+name: Prepare videos (fill Drive stash)
+
+# Every 6 hours: renders videos from your queue ahead of time and keeps
+# them ready in the Google Drive stash, until the stash target is reached
+# or Drive is nearly full. The daily publisher then posts from the stash
+# and frees the Drive space again — like a conveyor belt.
+
+on:
+  schedule:
+    - cron: "30 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: data-write
+  cancel-in-progress: false
+
+jobs:
+  prep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # Deno: the JavaScript runtime yt-dlp needs to solve YouTube's
+      # player puzzles (some formats are hidden without it)
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      # YouTube demands "PO tokens" (proof that a real player app is
+      # asking) before handing out video files — even logged in. This
+      # tiny helper server generates them; yt-dlp finds it automatically
+      # on port 4416 (the plugin is installed via requirements.txt).
+      - name: Start the YouTube PO-token helper
+        run: docker run -d --init --name pot-server -p 127.0.0.1:4416:4416 brainicism/bgutil-ytdlp-pot-provider
+
+      - name: Wait for the PO-token helper
+        run: |
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4416/ping > /dev/null; then
+              echo "PO-token helper is up"; exit 0
+            fi
+            sleep 2
+          done
+          echo "PO-token helper did not start; docker logs follow:"
+          docker logs pot-server
+          exit 1
+
+      - name: Install dependencies
+        run: pip install -r scripts/requirements.txt
+
+      - name: Render queue into the Drive stash
+        env:
+          YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
+          YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+          DRIVE_REFRESH_TOKEN: ${{ secrets.DRIVE_REFRESH_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          YOUTUBE_COOKIES: ${{ secrets.YOUTUBE_COOKIES }}
+        run: python scripts/prep_batch.py
+
+      - name: Save results
+        run: |
+          git config user.name "reel-autopilot-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data
+          git commit -m "prep: fill stash $(date -u '+%Y-%m-%d %H:%M')" || echo "no changes to commit"
+          git push
