@@ -29,7 +29,9 @@ FOLDER_NAME = "reel-autopilot"
 def drive_service():
     from googleapiclient.discovery import build
     from run_batch import make_credentials
-    return build("drive", "v3", credentials=make_credentials(), cache_discovery=False)
+    # kind='drive' -> uses the DRIVE_REFRESH_TOKEN secret
+    return build("drive", "v3", credentials=make_credentials(kind="drive"),
+                 cache_discovery=False)
 
 
 def ensure_folder(drv):

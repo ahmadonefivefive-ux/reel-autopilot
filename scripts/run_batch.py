@@ -219,12 +219,29 @@ def process(src, dst, settings, workdir):
 
 # ---------------------------------------------------------------- upload
 
-def make_credentials():
-    missing = [k for k in ("YT_CLIENT_ID", "YT_CLIENT_SECRET", "YT_REFRESH_TOKEN")
-               if not os.environ.get(k)]
+# Google does not allow YouTube and Drive permissions in the same consent,
+# so we keep TWO refresh tokens (two quick sign-ins in scripts/auth.py):
+TOKEN_ENV = {
+    "youtube": "YT_REFRESH_TOKEN",
+    "drive": "DRIVE_REFRESH_TOKEN",
+}
+
+
+def missing_secrets(kind="youtube"):
+    """Which required environment secrets are missing for this service."""
+    token_env = TOKEN_ENV.get(kind)
+    if not token_env:
+        raise ValueError(f"unknown credential kind: {kind!r}")
+    names = ["YT_CLIENT_ID", "YT_CLIENT_SECRET", token_env]
+    return [n for n in names if not os.environ.get(n)]
+
+
+def make_credentials(kind="youtube"):
+    """OAuth credentials for one service: 'youtube' or 'drive'."""
+    missing = missing_secrets(kind)
     if missing:
         raise RuntimeError(
-            f"missing secrets: {', '.join(missing)}. "
+            f"missing secrets for {kind}: {', '.join(missing)}. "
             "Add them in GitHub -> Settings -> Secrets and variables -> Actions."
         )
     from google.auth.transport.requests import Request
@@ -232,7 +249,7 @@ def make_credentials():
 
     creds = Credentials(
         token=None,
-        refresh_token=os.environ["YT_REFRESH_TOKEN"],
+        refresh_token=os.environ[TOKEN_ENV[kind]],
         token_uri="https://oauth2.googleapis.com/token",
         client_id=os.environ["YT_CLIENT_ID"],
         client_secret=os.environ["YT_CLIENT_SECRET"],
