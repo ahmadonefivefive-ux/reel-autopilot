@@ -358,32 +358,55 @@ def assemble(stock_path, audio_path, captions_path, out_path="final_video.mp4"):
         f":x=(w-text_w)/2:y={config.WATERMARK_Y}"
     )
 
-    if os.path.exists(music_path):
-        print("  Adding background music.")
-        cmd += ["-stream_loop", "-1", "-i", music_path]
-        filter_complex = (
+    def assemble_with(filter_complex, out_path):
+        cmd = [
+            "ffmpeg", "-y",
+            "-stream_loop", "-1", "-i", stock_path,
+            "-i", audio_path,
+        ]
+        if os.path.exists(music_path):
+            cmd += ["-stream_loop", "-1", "-i", music_path]
+        cmd += [
+            "-filter_complex", filter_complex,
+            "-map", "[v]", "-map", "[aout]",
+            "-t", f"{duration:.3f}",
+            "-c:v", "libx264", "-preset", "veryfast", "-crf", "21",
+            "-pix_fmt", "yuv420p", "-r", str(config.FPS),
+            "-c:a", "aac", "-b:a", "192k",
+            "-movflags", "+faststart",
+            "-shortest", out_path,
+        ]
+        run(cmd)
+        return out_path
+
+    styled = [
+        (
             f"[0:v]{video_style}[v];"
             f"[1:a]volume=1.0[a1];"
             f"[2:a]volume={config.MUSIC_VOLUME}[a2];"
             f"[a1][a2]amix=inputs=2:duration=first:dropout_transition=0:normalize=0[aout]"
-        )
-    else:
-        filter_complex = (
-            f"[0:v]{video_style}[v];"
-            f"[1:a]anull[aout]"
-        )
-
-    cmd += [
-        "-filter_complex", filter_complex,
-        "-map", "[v]", "-map", "[aout]",
-        "-t", f"{duration:.3f}",
-        "-c:v", "libx264", "-preset", "veryfast", "-crf", "21",
-        "-pix_fmt", "yuv420p", "-r", str(config.FPS),
-        "-c:a", "aac", "-b:a", "192k",
-        "-movflags", "+faststart",
-        "-shortest", out_path,
+        ),
+        f"[0:v]{video_style}[v];[1:a]anull[aout]",
     ]
-    run(cmd)
+    plain = [
+        (
+            f"[0:v]subtitles={captions_path}[v];"
+            f"[1:a]volume=1.0[a1];"
+            f"[2:a]volume={config.MUSIC_VOLUME}[a2];"
+            f"[a1][a2]amix=inputs=2:duration=first:dropout_transition=0:normalize=0[aout]"
+        ),
+        f"[0:v]subtitles={captions_path}[v];[1:a]anull[aout]",
+    ]
+
+    has_music = os.path.exists(music_path)
+    first = styled[0] if has_music else styled[1]
+    fallback = plain[0] if has_music else plain[1]
+
+    try:
+        assemble_with(first, out_path)
+    except subprocess.CalledProcessError:
+        print("  [!] Styled filter failed - retrying with plain captions-only assembly.")
+        assemble_with(fallback, out_path)
     return out_path
 
 
