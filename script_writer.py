@@ -20,13 +20,19 @@ import config
 
 GEMINI_MODELS = ["gemini-3.6-flash", "gemini-3.5-flash-lite", "gemini-3.1-flash-lite"]
 
+ALLOWED_DRAWS = [
+    "horse", "horse_ride", "battle", "wall", "sail", "map", "crown",
+    "pyramid", "palm", "arch", "book", "lamp", "coin", "fall",
+    "crowd", "flag", "banner",
+]
+
 PROMPT_TEMPLATE = """You are a top YouTube Shorts history storyteller. Write a script for this topic:
 
 "{topic}"
 
 Rules:
-- 90-115 words. About 35-45 seconds when spoken.
-- First sentence is the HOOK: a surprising fact, a number, or a direct question.
+- TOTAL 90-115 spoken words, told as 5 to 7 SCENES. Each scene is one beat of the story.
+- First scene is the HOOK: a surprising fact, a number, or a direct question.
   Never start with "Hey guys", "In this video", "Back in the day", or "Today we will learn".
 - Tell the story with 2-3 concrete facts. Use at least one date or number.
 - STRICT ACCURACY: only real, well-documented history. No invented events,
@@ -38,12 +44,25 @@ Rules:
 - Description: 1-2 sentences, then "#Shorts" and 3 relevant hashtags.
 - tags: 5-8 short search terms.
 
+for each scene choose "draw" from EXACTLY this list:
+horse, horse_ride, battle, wall, sail, map, crown, pyramid, palm, arch,
+book, lamp, coin, fall, crowd, flag, banner
+
+Each scene also needs:
+- "label": 1-4 words in CAPS for a title plate shown on the scene (e.g. "ISSUS 333 BC",
+  "JERUSALEM FALLS", "ONE MAN SAID NO"). Short and screen-worthy.
+- "text": the voiceover words for this scene. Concatenating all scene texts
+  must read as one natural script.
+
 Return ONLY this JSON, with no other text:
 {{
   "title": "...",
-  "script": "...",
   "description": "...",
-  "tags": ["...", "..."]
+  "tags": ["...", "..."],
+  "scenes": [
+    {{"draw": "horse", "label": "GAUGAMELA 331 BC", "text": "..."}},
+    {{"draw": "map", "label": "THE ROUTE EAST", "text": "..."}}
+  ]
 }}
 """
 
@@ -94,7 +113,7 @@ def parse_json(text):
 
 
 def validate(data):
-    for key in ("title", "script", "description"):
+    for key in ("title", "description"):
         if not data.get(key):
             raise ValueError(f"Gemini response is missing '{key}'.")
 
@@ -103,13 +122,32 @@ def validate(data):
         title = title.replace(ch, "")
     data["title"] = title[:100].strip()
 
-    script = " ".join(str(data["script"]).split())
-    words = script.split()
-    if len(words) < 60:
-        raise ValueError(f"Script is too short ({len(words)} words).")
-    if len(words) > 140:
-        words = words[:140]
-    data["script"] = " ".join(words)
+    scenes = data.get("scenes")
+    if not isinstance(scenes, list) or len(scenes) < 4 or len(scenes) > 8:
+        raise ValueError("Gemini must return 4-8 scenes, each with draw/label/text.")
+
+    allowed = {d.lower() for d in ALLOWED_DRAWS}
+    total_words = 0
+    for i, scene in enumerate(scenes):
+        draw = str(scene.get("draw", "")).strip().lower()
+        if draw not in allowed:
+            draw = "banner"
+        scene["draw"] = draw
+
+        label = " ".join(str(scene.get("label", "HISTORY")).split()).upper()
+        scene["label"] = label[:28] or "HISTORY"
+
+        text = " ".join(str(scene.get("text", "")).split())
+        if not text:
+            raise ValueError(f"Scene {i} has no text.")
+        scene["text"] = text
+        total_words += len(text.split())
+
+    if total_words < 60 or total_words > 160:
+        raise ValueError(f"Scene texts total {total_words} words - need 60-160.")
+
+    data["scenes"] = scenes
+    data["script"] = " ".join(scene["text"] for scene in scenes)
 
     description = str(data["description"]).strip()
     if "#Shorts" not in description and "#shorts" not in description.lower():
