@@ -224,11 +224,11 @@ def main():
         print("  [X] Every source is exhausted. Stopping instead of repeating a topic.")
         sys.exit(1)
 
-    # A different run number gives a different pick even if state was lost.
-    seed = os.environ.get("GITHUB_RUN_NUMBER") or str(int(time.time()))
-    chosen = random.Random(seed).choice(available)
+    # Strict list order: videos upload one after another from the curated pool.
+    chosen = available[0]
 
-    record_used(chosen)
+    # Do NOT record the topic here - failed runs would burn a topic without
+    # making a video. upload.py marks the topic used only after a successful upload.
 
     output = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
