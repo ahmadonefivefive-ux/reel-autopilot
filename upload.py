@@ -73,6 +73,67 @@ def get_authenticated_service():
     return build("youtube", "v3", credentials=creds)
 
 
+DRIVE_FOLDER_NAME = "Forgotten Empires"
+DRIVE_SCOPES = ["https://www.googleapis.com/auth/drive.file"]
+
+
+def build_drive_service():
+    refresh_token = os.environ.get("DRIVE_REFRESH_TOKEN", "").strip()
+    if not refresh_token:
+        sys.exit(
+            "DRIVE_REFRESH_TOKEN is not set. Add it in GitHub: "
+            "Settings -> Secrets and variables -> Actions."
+        )
+    client_id = (os.environ.get("DRIVE_CLIENT_ID") or os.environ.get("YT_CLIENT_ID") or "").strip()
+    client_secret = (os.environ.get("DRIVE_CLIENT_SECRET") or os.environ.get("YT_CLIENT_SECRET") or "").strip()
+    if not client_id or not client_secret:
+        sys.exit(
+            "Drive client ID/secret missing. Set DRIVE_CLIENT_ID/DRIVE_CLIENT_SECRET, "
+            "or reuse YT_CLIENT_ID/YT_CLIENT_SECRET (same Google project)."
+        )
+    creds = Credentials(
+        token=None,
+        refresh_token=refresh_token,
+        token_uri="https://oauth2.googleapis.com/token",
+        client_id=client_id,
+        client_secret=client_secret,
+        scopes=DRIVE_SCOPES,
+    )
+    creds.refresh(Request())
+    return build("drive", "v3", credentials=creds)
+
+
+def find_or_create_drive_folder(service):
+    q = (
+        "mimeType='application/vnd.google-apps.folder' and "
+        "name='" + DRIVE_FOLDER_NAME + "' and trashed=false"
+    )
+    res = service.files().list(q=q, spaces="drive", fields="files(id)").execute()
+    folders = res.get("files", [])
+    if folders:
+        return folders[0]["id"]
+    folder = service.files().create(
+        body={
+            "name": DRIVE_FOLDER_NAME,
+            "mimeType": "application/vnd.google-apps.folder",
+        },
+        fields="id",
+    ).execute()
+    print("  + Created Drive folder:", DRIVE_FOLDER_NAME)
+    return folder["id"]
+
+
+def drive_upload(service, folder_id, path, name, mime):
+    media = MediaFileUpload(path, mimetype=mime, resumable=True)
+    file = service.files().create(
+        body={"name": name, "parents": [folder_id]},
+        media_body=media,
+        fields="id, webViewLink",
+    ).execute()
+    print("  + Drive upload:", name, "->", file.get("webViewLink", "ok"))
+    return file["id"]
+
+
 def load_history():
     if not os.path.exists(HISTORY_FILE):
         return []
@@ -196,6 +257,30 @@ def main():
         "history", "historyfacts", "ancienthistory", "islamic history",
         "oneminutehistory", "shorts",
     ]
+
+    # Every video passes through Google Drive first, then YouTube, and is
+    # removed from Drive only after it is safely on YouTube.
+    require_drive = os.environ.get("DRIVE_REQUIRED", "1") != "0"
+    drive_ids = []
+    try:
+        drive_service = build_drive_service()
+        drive_folder = find_or_create_drive_folder(drive_service)
+        drive_ids.append(
+            drive_upload(drive_service, drive_folder, "final_video.mp4",
+                         title + ".mp4", "video/mp4")
+        )
+        if os.path.exists("thumbnail.jpg"):
+            drive_ids.append(
+                drive_upload(drive_service, drive_folder, "thumbnail.jpg",
+                             title + ".jpg", "image/jpeg")
+            )
+    except Exception as e:
+        if require_drive:
+            sys.exit(
+                f"Drive stash failed: {e}. Video was NOT uploaded to YouTube. "
+                "Fix Drive token/scope, or set DRIVE_REQUIRED=0 to allow direct upload."
+            )
+        print(f"  [!] Drive stash failed, continuing anyway: {e}")
 
     video_id = upload_video(
         youtube,
