@@ -47,15 +47,19 @@ If every topic source is exhausted, the bot **stops instead of repeating**.
    `token.pickle` — never upload those). Replace the old reposter code with
    this history pipeline.
 2. Repo Settings → Actions → General → **Read and write permissions** → Save.
-3. Repo Settings → Secrets → Actions — the same four secrets as before:
-   - `GEMINI_API_KEY` (same key you already have)
-   - `PEXELS_API_KEY` (same key you already have)
-   - `YT_CLIENT_SECRET_B64` (base64 of your client_secret.json — in
-     `..\reel-autopilot\client_secret.json`)
-   - `YT_TOKEN_PICKLE_B64` — the token stays valid after the channel rename
-     (channel ID doesn't change), so you can reuse the existing one IF it was
-     created for this same Google account/channel.
+3. Repo Settings → Secrets and variables → Actions — you already have these,
+   keep them, and the pipeline reads them directly (no base64 needed):
+   - `GEMINI_API_KEY`
+   - `YT_CLIENT_ID`, `YT_CLIENT_SECRET`, `YT_REFRESH_TOKEN`
+   - Optional, free: `PEXELS_API_KEY` (pexels.com/api) — without it the
+     pipeline pulls public-domain videos from Wikimedia Commons automatically
+   You do NOT need `YT_CLIENT_SECRET_B64` / `YT_TOKEN_PICKLE_B64`.
 4. Actions tab → **History Shorts Auto Pipeline** → Run workflow (first test).
+
+If something fails, use the small table in Documents\freelance-work\UPLOAD-GUIDE.md.
+
+The base64 secrets flow is no longer needed (kept here only for reference if you
+ever go back to local token.pickle usage):
 
 To create the base64 strings on Windows (PowerShell), one at a time:
 
