@@ -345,23 +345,29 @@ def assemble(stock_path, audio_path, captions_path, out_path="final_video.mp4"):
         "ffmpeg", "-y",
         "-stream_loop", "-1", "-i", stock_path,
         "-i", audio_path,
-    ]
+    ]    video_style = (
+        f"{config.GRADE_FILTER},"
+        f"subtitles={captions_path},"
+        f"drawtext=text='{config.WATERMARK}':fontfile={config.WATERMARK_FONT}"
+        f":fontsize={config.WATERMARK_FONTSIZE}:fontcolor=white@0.85"
+        f":borderw=2:bordercolor=black@0.55"
+        f":x=(w-text_w)/2:y={config.WATERMARK_Y}"
+    )
 
     if os.path.exists(music_path):
         print("  Adding background music.")
         cmd += ["-stream_loop", "-1", "-i", music_path]
         filter_complex = (
-            f"[0:v]subtitles={captions_path}[v];"
+            f"[0:v]{video_style}[v];"
             f"[1:a]volume=1.0[a1];"
             f"[2:a]volume={config.MUSIC_VOLUME}[a2];"
             f"[a1][a2]amix=inputs=2:duration=first:dropout_transition=0:normalize=0[aout]"
         )
     else:
         filter_complex = (
-            f"[0:v]subtitles={captions_path}[v];"
+            f"[0:v]{video_style}[v];"
             f"[1:a]anull[aout]"
         )
-
     cmd += [
         "-filter_complex", filter_complex,
         "-map", "[v]", "-map", "[aout]",
