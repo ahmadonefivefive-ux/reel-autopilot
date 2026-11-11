@@ -1,0 +1,25 @@
+# Never commit credentials
+token.pickle
+client_secret.json
+
+# Generated media
+clips/
+*.mp4
+*.mp3
+*.wav
+*.srt
+*.ass
+*.jpg
+*.jpeg
+*.png
+
+# Keep branding images if you add them
+!logo.png
+!banner.png
+!watermark.png
+!music/background.mp3
+
+# Python
+__pycache__/
+*.pyc
+.venv/
