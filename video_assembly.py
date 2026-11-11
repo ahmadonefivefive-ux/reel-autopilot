@@ -345,7 +345,9 @@ def assemble(stock_path, audio_path, captions_path, out_path="final_video.mp4"):
         "ffmpeg", "-y",
         "-stream_loop", "-1", "-i", stock_path,
         "-i", audio_path,
-    ]    video_style = (
+    ]
+
+    video_style = (
         f"{config.GRADE_FILTER},"
         f"subtitles={captions_path},"
         f"drawtext=text='{config.WATERMARK}':fontfile={config.WATERMARK_FONT}"
@@ -368,6 +370,7 @@ def assemble(stock_path, audio_path, captions_path, out_path="final_video.mp4"):
             f"[0:v]{video_style}[v];"
             f"[1:a]anull[aout]"
         )
+
     cmd += [
         "-filter_complex", filter_complex,
         "-map", "[v]", "-map", "[aout]",
