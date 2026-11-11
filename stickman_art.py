@@ -87,12 +87,23 @@ def stick(d, x, y, s, pose, stroke=13, color=CHARCOAL):
         d.ellipse([x + int(170 * s), hip_y - int(40 * s), x + int(170 * s) + hr * 2, hip_y - int(40 * s) + hr * 2], outline=color, width=stroke)
         return
     elif pose == "pointing":
+        # king's cape (drawn before the arms)
+        d.polygon([(x - int(12 * s), shoulder_y + int(6 * s)),
+                   (x + int(135 * s), shoulder_y + int(35 * s)),
+                   (x + int(28 * s), shoulder_y + int(330 * s))],
+                  fill=TEAL, outline=color)
         d.line([(x, hip_y), (x - int(55 * s), hip_y + int(190 * s))], fill=color, width=stroke)
         d.line([(x, hip_y), (x + int(70 * s), hip_y + int(185 * s))], fill=color, width=stroke)
     # torso
     d.line([(x, hip_y), (x, shoulder_y)], fill=color, width=stroke)
     # head
     d.ellipse([x - hr, head_y - hr, x + hr, head_y + hr], outline=color, width=stroke)
+    # helmet + plume for warriors
+    if pose in ("sword", "shield"):
+        d.pieslice([x - hr - 7, head_y - hr - 9, x + hr + 7, head_y + hr // 2 + 4],
+                   start=180, end=360, fill=CHARCOAL_SOFT, outline=color, width=stroke // 2)
+        d.line([(x, head_y - hr - 7), (x, head_y - hr - 30)], fill=color, width=stroke // 2 + 1)
+        d.ellipse([x - 12, head_y - hr - 46, x + 12, head_y - hr - 16], fill=ACCENT)
     # arms
     if pose == "standing":
         d.line([(x, shoulder_y), (x - int(80 * s), shoulder_y + int(115 * s))], fill=color, width=stroke)
@@ -183,11 +194,36 @@ def doodle(img, kind):
                 d.arc([xx, wy - 22, xx + 80, wy + 22], start=200, end=340, fill=TEAL, width=8)
 
     elif kind == "map":
-        d.rounded_rectangle([cx - 400, ground - 560, cx + 400, ground - 40], radius=34, outline=CHARCOAL, width=11, fill=PARCH_TOP)
-        d.line([(cx - 300, ground - 160), (cx - 80, ground - 380), (cx + 120, ground - 220), (cx + 330, ground - 470)], fill=CHARCOAL_SOFT, width=9)
-        d.ellipse([cx - 340, ground - 200, cx - 260, ground - 120], outline=CHARCOAL, width=9)
-        d.ellipse([cx + 260, ground - 520, cx + 340, ground - 440], outline=CHARCOAL, width=9)
-        d.polygon([(cx + 330, ground - 470), (cx + 235, ground - 425), (cx + 300, ground - 380)], fill=ACCENT)
+        d.rounded_rectangle([cx - 400, ground - 560, cx + 400, ground - 40], radius=34,
+                            outline=CHARCOAL, width=11, fill=PARCH_TOP)
+        d.rounded_rectangle([cx - 372, ground - 532, cx + 372, ground - 68], radius=24,
+                            outline=CHARCOAL_SOFT, width=4)
+        pts = [(cx - 300, ground - 155), (cx - 80, ground - 380), (cx + 120, ground - 220), (cx + 330, ground - 470)]
+        # dashed campaign route
+        for i in range(len(pts) - 1):
+            ax, ay = pts[i]
+            bx, by = pts[i + 1]
+            for step in range(0, 11, 2):
+                t0, t1 = step / 10, min(1, (step + 1.1) / 10)
+                x0, y0 = ax + (bx - ax) * t0, ay + (by - ay) * t0
+                x1, y1 = ax + (bx - ax) * t1, ay + (by - ay) * t1
+                d.line([(x0, y0), (x1, y1)], fill=CHARCOAL, width=10)
+        # crossed swords at the battle site (midpoint)
+        bx, by = pts[1]
+        d.line([(bx - 34, by - 34), (bx + 34, by + 34)], fill=CHARCOAL, width=12)
+        d.line([(bx - 34, by + 34), (bx + 34, by - 34)], fill=CHARCOAL, width=12)
+        # capital star at the destination
+        sx, sy = pts[-1]
+        d.ellipse([sx - 42, sy - 42, sx + 42, sy + 42], outline=CHARCOAL, width=9)
+        d.polygon([(sx, sy - 24), (sx + 12, sy - 6), (sx + 30, sy - 8), (sx + 16, sy + 7),
+                   (sx + 22, sy + 26), (sx, sy + 14), (sx - 22, sy + 26), (sx - 16, sy + 7),
+                   (sx - 30, sy - 8), (sx - 12, sy - 6)], fill=ACCENT, outline=CHARCOAL)
+        # compass rose, top left
+        ccx, ccy = cx - 310, ground - 425
+        d.ellipse([ccx - 52, ccy - 52, ccx + 52, ccy + 52], outline=CHARCOAL_SOFT, width=6)
+        d.line([(ccx, ccy - 34), (ccx, ccy + 34)], fill=CHARCOAL_SOFT, width=5)
+        d.line([(ccx - 34, ccy), (ccx + 34, ccy)], fill=CHARCOAL_SOFT, width=5)
+        d.polygon([(ccx, ccy - 34), (ccx - 9, ccy - 6), (ccx + 9, ccy - 6)], fill=ACCENT)
 
     elif kind == "crown":
         zigzag = [(cx - 260, ground), (cx - 260, ground - 260), (cx - 180, ground - 150), (cx - 90, ground - 380),
