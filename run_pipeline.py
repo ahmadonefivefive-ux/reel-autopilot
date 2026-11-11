@@ -17,7 +17,7 @@ STEPS = [
     ("Finding a fresh topic...", "topic_finder.py"),
     ("Writing the script...", "script_writer.py"),
     ("Generating the voiceover...", "voiceover.py"),
-    ("Assembling the video...", "video_assembly.py"),
+    ("Assembling the video...", "stickman.py"),
     ("Creating the thumbnail...", "thumbnail.py"),
     ("Uploading to YouTube...", "upload.py"),
 ]
@@ -35,8 +35,12 @@ ARTIFACTS = [
     "thumbnail.jpg",
     "thumb_bg.jpg",
     "stock_loop.mp4",
+    "stock_scenes.mp4",
     "segments.txt",
 ]
+
+# Scene images and segments are recreated on every run - never keep them.
+ARTIFACT_GLOBS = ("scene_*.png", "seg_*.mp4")
 
 
 def clean_artifacts():
@@ -50,8 +54,9 @@ def clean_artifacts():
     if os.path.isdir("clips"):
         shutil.rmtree("clips", ignore_errors=True)
 
-    for name in os.listdir("."):
-        if name.startswith("seg_") and name.endswith(".mp4"):
+    for prefix in ARTIFACT_GLOBS:
+        import glob
+        for name in glob.glob(prefix):
             try:
                 os.remove(name)
             except OSError:
