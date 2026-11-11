@@ -162,7 +162,9 @@ def pick_file(video):
 
 
 def download(url, path):
-    with requests.get(url, stream=True, timeout=120) as resp:
+    # Wikimedia blocks the default python-requests UA with 403 - identify ourselves.
+    headers = {"User-Agent": "ForgottenEmpiresBot/1.0 (GitHub Actions; history Shorts channel)"}
+    with requests.get(url, headers=headers, stream=True, timeout=120) as resp:
         resp.raise_for_status()
         with open(path, "wb") as f:
             for chunk in resp.iter_content(chunk_size=1024 * 256):
