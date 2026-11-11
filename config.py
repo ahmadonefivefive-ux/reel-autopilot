@@ -28,3 +28,10 @@ MUSIC_VOLUME = 0.08
 
 # How many different Pexels clips to use per video.
 CLIP_COUNT = 4
+
+# Channel style — applied to EVERY video so the channel feels identical each time.
+GRADE_FILTER = "eq=saturation=0.88:gamma=1.03:contrast=0.98,vignette=angle=PI/4.5"
+WATERMARK = "FORGOTTEN EMPIRES"
+WATERMARK_FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+WATERMARK_FONTSIZE = 36
+WATERMARK_Y = 64
