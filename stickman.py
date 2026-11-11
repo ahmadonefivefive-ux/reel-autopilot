@@ -238,7 +238,7 @@ def xfade_concat(segments, durations, out_path):
         cumulative += durations[i - 1]
         offset = max(0.1, cumulative - 0.7 * i)
         out_label = "[vout]" if i == n - 1 else f"[v{i}]"
-        chain.append(f"{prev}[{i}:v]xfade=t=fade:d=0.7:offset={offset:.2f}{out_label}")
+        chain.append(f"{prev}[{i}:v]xfade=transition=fade:duration=0.7:offset={offset:.2f}{out_label}")
         prev = out_label
     filter_complex = ";".join(chain)
     cmd = ["ffmpeg", "-y"] + inputs + [
@@ -248,8 +248,20 @@ def xfade_concat(segments, durations, out_path):
         "-pix_fmt", "yuv420p", "-r", str(config.FPS),
         out_path,
     ]
-    run(cmd)
-    return out_path
+    try:
+        run(cmd)
+        return out_path
+    except subprocess.CalledProcessError:
+        print("  [!] Fade transitions failed - using plain concat instead.")
+        with open("segments.txt", "w", encoding="utf-8") as f:
+            for seg in segments:
+                f.write(f"file '{os.path.abspath(seg)}'\n")
+        run([
+            "ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", "segments.txt",
+            "-c:v", "libx264", "-preset", "veryfast", "-crf", "23",
+            "-pix_fmt", "yuv420p", "-r", str(config.FPS), out_path,
+        ])
+        return out_path
 
 
 def assemble(stock_video, audio_path, captions_path, out_path="final_video.mp4"):
