@@ -1,104 +1,73 @@
-# Forgotten Empires — history Shorts bot
+# Forgotten Empires — history Shorts pipeline
 
-*The channel is called **Forgotten Empires**. The GitHub repo keeps its old
-name **reel-autopilot** — the code inside it is fully replaced by this
-pipeline. The YouTube channel itself is renamed from the old reposter channel
-(old repost videos: delete or set private first).*
+*The channel is **Forgotten Empires**. The GitHub repo keeps its old name
+**reel-autopilot** — the code inside is this pipeline.*
 
-A free pipeline that makes **one history Short every day** and uploads it to
-YouTube automatically. It is the science-shorts-bot you already know, rebuilt
-for history: Alexander the Great, Muslim leaders, empires, battles, and
-historical mysteries.
+One history Short every day at 12:00 PM US Eastern, made and uploaded
+automatically. Everything here runs on free tiers: Gemini free tier, edge-tts
+voice, PIL-drawn stickman art, ffmpeg, GitHub Actions.
 
-**Cost: $0.** Gemini free tier + Pexels free clips + edge-tts voice + GitHub
-Actions. No card, no bank account, nothing to pay.
+**Cost: $0.** No card, no bank account, nothing to pay.
 
-## What is different from the science bot
+## What each run does
 
-| Thing | Science bot | This bot |
-|---|---|---|
-| Topics | 120 science questions | 120+ history stories (Alexander, Salahuddin, Tariq ibn Ziyad, Mehmed II, Mansa Musa, Rome, Egypt, Mongols, Mughals, Ottomans...) |
-| Script style | friendly teacher | cinematic storyteller, must use a real date or number, **no invented facts** |
-| Voice | Jenny (female) | Guy (male documentary voice) |
-| Upload rate | 4 per day | **1 per day** (noon US Eastern) |
-| Tags | science | history, ancient history, Islamic history |
-| Ledger | used science topics | starts EMPTY — it records every finished history video, so **no video is ever made twice** |
+1. `topic_finder.py` — picks the next topic in strict list order, never repeating.
+2. `script_writer.py` — Gemini writes a 90-115 word, 5-7 scene script with a
+   hook, real dates, and one documented "bravery line". Refuses to fall back to
+   a generic script.
+3. `voiceover.py` — edge-tts (`en-US-ChristopherNeural`) with word-level timings.
+4. `stickman.py` — draws every scene with PIL, animates a slow zoom, fades the
+   scenes together, burns synced captions, normalises loudness to -14 LUFS.
+5. `thumbnail.py` — brand-locked parchment thumbnail with the episode number.
+6. `upload.py` — Drive relay (stash → YouTube → delete), upload, thumbnail,
+   description template, history ledger.
+7. `run_summary.py` — writes a readable report to the Actions run page.
 
-## The no-repeat ledger (your rule)
+## Art
 
-Every finished video's topic is written into `used_topics.json` before the
-video is even made. Before picking a new topic, the bot checks:
+Every frame is drawn in code (`stickman_art.py`) — no stock footage, no
+licensing, one consistent look:
 
-1. `used_topics.json` (topics already made)
-2. `uploaded_history.json` (topics actually on YouTube — second safety net)
-3. Word stems and word pairs, so "Saladin" and "Salahuddin" count as the same.
+| Scene | Use |
+|---|---|
+| `troops` | large armies as two blocks of dots, not stickman crowds |
+| `campaignmap` | Arabia campaign map: green heartland, mosque, dashed route, battle banners |
+| `battle`, `wall` | sieges and field battles |
+| `horse`, `horse_ride`, `crown`, `flag`, `banner` | characters and courts |
+| `map`, `sail`, `palm`, `arch`, `pyramid`, `book`, `lamp`, `coin`, `fall`, `crowd` | the rest |
 
-If every topic source is exhausted, the bot **stops instead of repeating**.
+Each scene carries a title plate, the channel footer, and the last scene carries
+a subscribe end card.
 
-## Setup (same flow as before — 15 minutes)
+## The no-repeat ledger
 
-0. In **YouTube Studio**, rename the channel to **Forgotten Empires**
-   (Customisation → Basic info → Name). Before that, **delete or set private
-   all old reposted videos** — YouTube counts them as reused content and it
-   can demonetize or strike the whole channel.
-1. Your GitHub repo is **reel-autopilot** (keep the name, as you decided).
-   Open it in the browser → **Add file → Upload files** → drag and drop
-   EVERYTHING in this folder (except `client_secret*.json` and
-   `token.pickle` — never upload those). Replace the old reposter code with
-   this history pipeline.
-2. Repo Settings → Actions → General → **Read and write permissions** → Save.
-3. Repo Settings → Secrets and variables → Actions — you already have these,
-   keep them, and the pipeline reads them directly (no base64 needed):
-   - `GEMINI_API_KEY`
-   - `YT_CLIENT_ID`, `YT_CLIENT_SECRET`, `YT_REFRESH_TOKEN`
-   - Optional, free: `PEXELS_API_KEY` (pexels.com/api) — without it the
-     pipeline pulls public-domain videos from Wikimedia Commons automatically
-   You do NOT need `YT_CLIENT_SECRET_B64` / `YT_TOKEN_PICKLE_B64`.
-4. Actions tab → **History Shorts Auto Pipeline** → Run workflow (first test).
+`used_topics.json` is written **only after a successful upload**, and checked
+before every pick, along with `uploaded_history.json`. Matching uses word stems
+and word pairs, so "Saladin" and "Salahuddin" count as the same topic. If every
+source is exhausted, the bot stops instead of repeating.
 
-If something fails, use the small table in Documents\freelance-work\UPLOAD-GUIDE.md.
+## Secrets (repo → Settings → Secrets and variables → Actions)
 
-The base64 secrets flow is no longer needed (kept here only for reference if you
-ever go back to local token.pickle usage):
+- `GEMINI_API_KEY`
+- `YT_CLIENT_ID`, `YT_CLIENT_SECRET`, `YT_REFRESH_TOKEN`
+- `DRIVE_REFRESH_TOKEN` (same Google project; scope `drive.file`)
 
-To create the base64 strings on Windows (PowerShell), one at a time:
+No base64 secrets are needed. Optional: set `DRIVE_REQUIRED=0` to allow a
+direct upload if Drive ever fails.
 
-```powershell
-# paste result into YT_TOKEN_PICKLE_B64
-[Convert]::ToBase64String([IO.File]::ReadAllBytes("token.pickle")) | Set-Clipboard
-# paste result into YT_CLIENT_SECRET_B64
-[Convert]::ToBase64String([IO.File]::ReadAllBytes("client_secret.json")) | Set-Clipboard
+## YouTube rules for AI-made videos (honest defaults)
+
+- Disclose synthetic voice when YouTube asks ("altered content: yes").
+- Every script is written for its own topic — not mass-produced spam.
+- Monetization needs 1,000 subscribers + 4,000 watch hours (or 10M Shorts
+  views). Daily uploads make that a months-long climb, not a shortcut.
+
+## Local run
+
+```bash
+pip install -r requirements.txt
+python run_pipeline.py
 ```
 
-Your `client_secret.json` for this is in `..\reel-autopilot\client_secret.json`.
-The token is created by running `python upload.py` once in this folder on your
-laptop (it opens a browser and you log into the Google account that owns the
-new history channel).
-
-## YouTube rules for AI-made videos (important, honest)
-
-- Tick **"Altered content: yes"** when YouTube asks if content is synthetic —
-  the voice is AI. This is YouTube's own disclosure question; being honest
-  keeps the channel safe.
-- This bot writes a **real script about a real topic** every time — it is not
-  mass-produced spam. That is what YouTube's 2025 "inauthentic content" rule
-  targets, and this pipeline is built to stay on the right side of it.
-- Monetization needs 1,000 subscribers + 4,000 watch hours (or 10M Shorts
-  views). Realistic with daily uploads: months, not days.
-
-## Still to build (next session)
-
-- **10-minute long videos** every 3 days (this bot makes ≤60s Shorts; long
-  videos need a different assembly step — planned, not built yet)
-- **Stickman animation style** — the current look is cinematic stock footage
-  + captions + voiceover. A code-drawn stickman style is possible later with
-  free tools (this is the upgrade you asked for)
-- **Urdu version** of the channel — your native-language edge (same pipeline,
-  Urdu voice `ur-PK-AsadNeural`, Urdu scripts)
-
-## Where videos live
-
-On GitHub Actions the video uploads straight to YouTube — nothing touches
-your laptop or Drive, and nothing fills your Drive storage. If you ever run it
-locally (`python run_pipeline.py`), the finished `final_video.mp4` stays in
-this folder for you to upload or copy to your Google Drive yourself.
+Needs `ffmpeg` and `ffprobe` on PATH. The finished `final_video.mp4` stays in
+the folder if you run it locally.
