@@ -62,8 +62,10 @@ Scene-picking guide:
 - For defeat or death use "fall".
 
 Each scene also needs:
-- "label": 1-4 words in CAPS for a title plate shown on the scene (e.g. "ISSUS 333 BC",
-  "JERUSALEM FALLS", "ONE MAN SAID NO"). Short and screen-worthy.
+- "label": 1-4 words in CAPS for a title plate shown on the scene. It must
+  carry the story with the sound OFF, like a headline: "HE WAS 12",
+  "20,000 VS 47,000", "THE CITY FELL", "ONE MAN SAID NO". Never a vague
+  place name on its own.
 - "text": the voiceover words for this scene. Concatenating all scene texts
   must read as one natural script.
 
