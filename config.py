@@ -10,8 +10,8 @@ AUDIENCE = "USA"
 UPLOADS_PER_RUN = 1
 
 # Voice
-EDGE_TTS_VOICE = "en-US-GuyNeural"
-EDGE_TTS_RATE = "+6%"
+EDGE_TTS_VOICE = "en-US-ChristopherNeural"
+EDGE_TTS_RATE = "+2%"
 GTTS_SPEED = 1.1
 
 # Video
