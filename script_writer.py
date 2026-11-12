@@ -23,7 +23,7 @@ GEMINI_MODELS = ["gemini-3.6-flash", "gemini-3.5-flash-lite", "gemini-3.1-flash-
 ALLOWED_DRAWS = [
     "horse", "horse_ride", "battle", "wall", "sail", "map", "crown",
     "pyramid", "palm", "arch", "book", "lamp", "coin", "fall",
-    "crowd", "flag", "banner",
+    "crowd", "troops", "campaignmap", "flag", "banner",
 ]
 
 PROMPT_TEMPLATE = """You are a top YouTube Shorts history storyteller. Write a script for this topic:
@@ -46,7 +46,17 @@ Rules:
 
 for each scene choose "draw" from EXACTLY this list:
 horse, horse_ride, battle, wall, sail, map, crown, pyramid, palm, arch,
-book, lamp, coin, fall, crowd, flag, banner
+book, lamp, coin, fall, crowd, troops, campaignmap, flag, banner
+
+Scene-picking guide:
+- For any scene about a LARGE ARMY or battle line, use "troops"
+  (two armies as columns of dots facing each other) - not "crowd".
+- For stories about the early Islamic conquests or the Rashidun caliphs,
+  use "campaignmap" (a stylized map of Arabia with the Muslim heartland,
+  mosque and conquest cities).
+- For battles and sieges use "battle","wall".
+- For tricks and geography use "map".
+- For defeat or death use "fall".
 
 Each scene also needs:
 - "label": 1-4 words in CAPS for a title plate shown on the scene (e.g. "ISSUS 333 BC",
