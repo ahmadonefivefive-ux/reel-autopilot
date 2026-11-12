@@ -130,6 +130,28 @@ def clamp_entry(start, end, duration):
     return start, end
 
 
+def clean_caption_text(text):
+    return (
+        text.replace("\\", "")
+        .replace("{", "")
+        .replace("}", "")
+        .replace("\n", " ")
+        .strip()
+    )
+
+
+def karaoke_line(words):
+    """Word-timed line: each word turns gold as it is spoken (ASS karaoke)."""
+    parts = []
+    for word in words:
+        text = clean_caption_text(word["text"])
+        if not text:
+            continue
+        centis = max(1, int(round(word.get("duration", 0.25) * 100)))
+        parts.append(f"{{\\k{centis}}}{text}")
+    return " ".join(parts)
+
+
 def build_captions(script_text, duration, out_path="captions.ass"):
     boundaries = load_boundaries()
     entries = []
@@ -139,16 +161,16 @@ def build_captions(script_text, duration, out_path="captions.ass"):
         for word in boundaries:
             chunk.append(word)
             text = " ".join(w["text"] for w in chunk)
-            if len(chunk) >= 4 or re.search(r"[.!?,;:]$", text):
+            if len(chunk) >= 3 or re.search(r"[.!?,;:]$", text):
                 start = chunk[0]["start"]
                 end = chunk[-1]["start"] + chunk[-1]["duration"] + 0.10
-                entries.append((*clamp_entry(start, end, duration), text))
+                entries.append((*clamp_entry(start, end, duration), karaoke_line(chunk)))
                 chunk = []
         if chunk:
             start = chunk[0]["start"]
             end = chunk[-1]["start"] + chunk[-1]["duration"] + 0.10
             entries.append(
-                (*clamp_entry(start, end, duration), " ".join(w["text"] for w in chunk))
+                (*clamp_entry(start, end, duration), karaoke_line(chunk))
             )
     else:
         words = script_text.split()
@@ -160,6 +182,12 @@ def build_captions(script_text, duration, out_path="captions.ass"):
             for i, group in enumerate(groups)
         ]
 
+    # Never show two caption lines at once: each line ends where the next begins.
+    for i in range(len(entries) - 1):
+        start, end, text = entries[i]
+        next_start = entries[i + 1][0]
+        entries[i] = (start, min(end, max(start + 0.10, next_start - 0.02)), text)
+
     header = f"""[Script Info]
 ScriptType: v4.00+
 PlayResX: {config.VIDEO_WIDTH}
@@ -169,7 +197,7 @@ ScaledBorderAndShadow: yes
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Default,DejaVu Sans,{config.CAPTION_FONT_SIZE},&H00FFFFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,4,0,2,70,70,{config.CAPTION_MARGIN_V},1
+Style: Default,DejaVu Sans,{config.CAPTION_FONT_SIZE},&H000B86B8,&H00FFFFFF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,5,1,2,70,70,{config.CAPTION_MARGIN_V},1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -178,13 +206,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
     with open(out_path, "w", encoding="utf-8") as f:
         f.write(header)
         for start, end, text in entries:
-            safe = (
-                text.replace("\\", "")
-                .replace("{", "")
-                .replace("}", "")
-                .replace("\n", " ")
-                .strip()
-            )
+            safe = str(text).replace("\n", " ").strip()
             if safe:
                 f.write(
                     f"Dialogue: 0,{ass_time(start)},{ass_time(end)},"
