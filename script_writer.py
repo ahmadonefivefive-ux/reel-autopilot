@@ -23,7 +23,7 @@ GEMINI_MODELS = ["gemini-3.6-flash", "gemini-3.5-flash-lite", "gemini-3.1-flash-
 ALLOWED_DRAWS = [
     "horse", "horse_ride", "battle", "wall", "sail", "map", "crown",
     "pyramid", "palm", "arch", "book", "lamp", "coin", "fall",
-    "crowd", "troops", "campaignmap", "flag", "banner",
+    "crowd", "campaignmap", "flag", "banner",
 ]
 
 PROMPT_TEMPLATE = """You are a top YouTube Shorts history storyteller. Write a script for this topic:
@@ -35,26 +35,29 @@ Rules:
 - First scene is the HOOK: a surprising fact, a number, or a direct question.
   Never start with "Hey guys", "In this video", "Back in the day", or "Today we will learn".
 - Tell the story with 2-3 concrete facts. Use at least one date or number.
+- Include ONE "bravery line": a specific, human, non-textbook detail that most
+  people have never heard - a smell, a price, a betrayal, a mistake, a small
+  object. It must be real and documented. This is the line viewers repeat.
 - STRICT ACCURACY: only real, well-documented history. No invented events,
   numbers, or quotes. If a detail is debated by historians, say so briefly
   or leave it out.
 - End with a clear payoff: the surprising outcome or the reason it mattered.
+- Make the last sentence loop back to the first line's idea, so a replay feels
+  seamless instead of sudden. Do not repeat the exact words.
 - Cinematic documentary tone. Short sentences. Respectful of all figures.
 - Title: maximum 60 characters, curiosity-driven, and truthful.
-- Description: 1-2 sentences, then "#Shorts" and 3 relevant hashtags.
+- Description: ONE sentence only. No hashtags (the uploader adds them).
 - tags: 5-8 short search terms.
 
 for each scene choose "draw" from EXACTLY this list:
 horse, horse_ride, battle, wall, sail, map, crown, pyramid, palm, arch,
-book, lamp, coin, fall, crowd, troops, campaignmap, flag, banner
+book, lamp, coin, fall, crowd, campaignmap, flag, banner
 
 Scene-picking guide:
-- For any scene about a LARGE ARMY or battle line, use "troops"
-  (two armies as columns of dots facing each other) - not "crowd".
+- For a LARGE ARMY, a siege or a battle line, use "battle" or "wall".
 - For stories about the early Islamic conquests or the Rashidun caliphs,
   use "campaignmap" (a stylized map of Arabia with the Muslim heartland,
   mosque and conquest cities).
-- For battles and sieges use "battle","wall".
 - For tricks and geography use "map".
 - For defeat or death use "fall".
 
