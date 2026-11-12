@@ -28,6 +28,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+          cache: pip
 
       - name: Install FFmpeg and fonts
         run: |
@@ -46,6 +47,10 @@ jobs:
           YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
           DRIVE_REFRESH_TOKEN: ${{ secrets.DRIVE_REFRESH_TOKEN }}
         run: python3 run_pipeline.py
+
+      - name: Write run report
+        if: always()
+        run: python3 run_summary.py >> "$GITHUB_STEP_SUMMARY" || true
 
       - name: Save topic state back to the repo
         if: always()
