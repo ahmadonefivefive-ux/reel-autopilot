@@ -30,9 +30,8 @@ licensing, one consistent look:
 
 | Scene | Use |
 |---|---|
-| `troops` | large armies as two blocks of dots, not stickman crowds |
+| `battle`, `wall` | sieges and field battles, large armies |
 | `campaignmap` | Arabia campaign map: green heartland, mosque, dashed route, battle banners |
-| `battle`, `wall` | sieges and field battles |
 | `horse`, `horse_ride`, `crown`, `flag`, `banner` | characters and courts |
 | `map`, `sail`, `palm`, `arch`, `pyramid`, `book`, `lamp`, `coin`, `fall`, `crowd` | the rest |
 
