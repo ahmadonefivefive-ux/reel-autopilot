@@ -24,6 +24,24 @@ PLATE = (28, 21, 15)
 PLATE_EDGE = (90, 74, 55)
 
 
+CAP_FONT = [
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+    "C:/Windows/Fonts/arialbd.ttf",
+]
+SMALL_FONT = [
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+    "C:/Windows/Fonts/arialbd.ttf",
+]
+
+def load_font(size, candidates):
+    from PIL import ImageFont
+    for p in candidates:
+        try:
+            return ImageFont.truetype(p, size)
+        except Exception:
+            continue
+    return ImageFont.load_default()
+
 def parchment(seed=7):
     img = Image.new("RGB", (W, H))
     px = img.load()
@@ -305,6 +323,107 @@ def doodle(img, kind):
         d.rounded_rectangle([cx - 430, ground - 430, cx + 430, ground - 170], radius=60, outline=CHARCOAL, width=13, fill=ACCENT)
         d.polygon([(cx - 480, ground - 430), (cx - 430, ground - 430), (cx - 430, ground - 300)], fill=CHARCOAL_SOFT)
         d.polygon([(cx + 480, ground - 430), (cx + 430, ground - 430), (cx + 430, ground - 300)], fill=CHARCOAL_SOFT)
+
+    elif kind == "troops":
+        rng = random.Random(23)
+        PINK = (235, 130, 180)
+        GREEN = (72, 105, 62)
+        DARK = (45, 35, 30)
+        # left army - the big host (crescents of soldiers in cerise dots)
+        for col in range(7):
+            x = 55 + col * 88 + rng.randint(-10, 10)
+            for row in range(0, 9):
+                y = ground - 35 - row * 98 + rng.randint(-10, 10)
+                if y > ground - 20 or x > cx - 30:
+                    continue
+                r = 23 + rng.randint(-3, 3)
+                d.ellipse([x - r, y - r, x + r, y + r], fill=PINK, outline=CHARCOAL, width=3)
+        # right army - darker green wall
+        for col in range(6):
+            x = W - 55 - col * 88 + rng.randint(-10, 10)
+            for row in range(0, 7):
+                y = ground - 35 - row * 98 + rng.randint(-10, 10)
+                if y > ground - 20 or x < cx + 30:
+                    continue
+                r = 19 + rng.randint(-3, 3)
+                fill = DARK if (col + row) % 3 == 0 else GREEN
+                d.ellipse([x - r, y - r, x + r, y + r], fill=fill, outline=CHARCOAL, width=3)
+        # front line ripple across the middle
+        for y in range(ground - 55, ground - 780, 28):
+            d.line([(cx - 16, y), (cx + 16, y)], fill=CHARCOAL_SOFT, width=4)
+        # generals
+        stick(d, 70, ground - 130, 0.6, "pointing", stroke=9)
+        stick(d, W - 70, ground - 130, 0.6, "sword", stroke=9)
+
+    elif kind == "campaignmap":
+        # wash: whole canvas is water (greenish-grey map parchment)
+        d.rectangle([0, 0, W, H], fill=(185, 200, 190))
+        # Arabian peninsula landmass (stylized)
+        land = [
+            (140, 660),
+            (260, 700),
+            (560, 645),
+            (790, 690),
+            (1000, 660),
+            (1050, 900),
+            (1010, 1230),
+            (830, 1510),
+            (660, 1650),
+            (450, 1565),
+            (255, 1485),
+            (185, 1150),
+            (150, 900),
+        ]
+        d.polygon(land, fill=PARCH_TOP, outline=CHARCOAL, width=10)
+        # inner green core - the Muslim heartland
+        core = [
+            (300, 810),
+            (520, 760),
+            (720, 790),
+            (880, 840),
+            (860, 1220),
+            (720, 1450),
+            (520, 1460),
+            (380, 1400),
+            (270, 1150),
+            (240, 880),
+        ]
+        d.polygon(core, fill=(125, 160, 105), outline=CHARCOAL_SOFT, width=8)
+        # route with dashes: Yemen -> Makka -> Levant -> Ctesiphon
+        route = [(320, 1430), (430, 1180), (470, 1100), (560, 850), (640, 760), (760, 690)]
+        for i in range(len(route) - 1):
+            ax, ay = route[i]
+            bx, by = route[i + 1]
+            for step in range(0, 12, 2):
+                t0, t1 = step / 10, min(1, (step + 1.1) / 10)
+                d.line(
+                    [(ax + (bx - ax) * t0, ay + (by - ay) * t0),
+                     (ax + (bx - ax) * t1, ay + (by - ay) * t1)],
+                    fill=(140, 60, 30), width=8,
+                )
+        # arrowhead at the end of the route
+        ex, ey = route[-1]
+        d.polygon([(ex, ey - 4), (ex - 48, ey - 36), (ex - 40, ey + 26)], fill=(140, 60, 30))
+        # mosque icon at Makka (green dome + two minarets + gold crescent)
+        mx, my = 470, 1110
+        d.ellipse([mx - 70, my - 90, mx + 70, my + 30], fill=(30, 110, 55), outline=CHARCOAL, width=9)
+        d.rectangle([mx - 70, my - 30, mx + 70, my + 30], fill=(30, 110, 55), outline=CHARCOAL, width=6)
+        d.rectangle([mx - 100, my - 68, mx - 74, my + 30], fill=PARCH_TOP, outline=CHARCOAL, width=6)
+        d.rectangle([mx + 74, my - 68, mx + 100, my + 30], fill=PARCH_TOP, outline=CHARCOAL, width=6)
+        d.line([(mx, my - 120), (mx, my - 152)], fill=CHARCOAL, width=8)
+        d.ellipse([mx - 9, my - 170, mx + 9, my - 152], fill=ACCENT)
+        # battle banners on the route
+        def banner(x, y, name):
+            d.line([(x, y), (x, y - 74)], fill=CHARCOAL, width=9)
+            d.polygon([(x, y - 74), (x + 58, y - 54), (x, y - 32)], fill=(30, 110, 55), outline=CHARCOAL)
+            d.ellipse([x - 4, y - 112, x + 28, y - 78], fill=ACCENT, outline=CHARCOAL)
+            d.text((x - 44, y + 8), name, fill=CHARCOAL, font=load_font(26, CAP_FONT))
+        banner(290, 1240, "YARMOUK")
+        banner(565, 845, "JERUSALEM 638")
+        banner(800, 560, "CTESIPHON 637")
+        # title
+        d.text((70, 145), "THE ARAB CONQUESTS", fill=CHARCOAL, font=load_font(66, CAP_FONT))
+        d.text((70, 255), "622 - 661 AD", fill=CHARCOAL_SOFT, font=load_font(52, SMALL_FONT))
 
     else:  # fallback: hero standing with sun
         stick(d, cx, ground, 1.0, "standing")
