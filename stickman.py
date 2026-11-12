@@ -68,9 +68,23 @@ def audio_duration(path):
 def render_scenes(scenes):
     from PIL import ImageDraw
     paths = []
+    last = len(scenes) - 1
     for i, scene in enumerate(scenes):
         img = render_scene(scene.get("draw", "banner"), seed=41 + i * 13)
         d = ImageDraw.Draw(img)
+
+        # End card on the final scene only: one line, no clutter.
+        if i == last:
+            cta = load_font(40, LABEL_FONT)
+            text = "SUBSCRIBE  \u2022  NEW EMPIRE DAILY"
+            tw = d.textlength(text, font=cta)
+            pad = 34
+            x0 = (W - tw) / 2 - pad
+            x1 = (W + tw) / 2 + pad
+            d.rounded_rectangle([x0, 1150, x1, 1250], radius=50,
+                                fill=PLATE, outline=PLATE_EDGE, width=5)
+            d.text(((W - tw) / 2, 1172), text, font=cta, fill=(212, 175, 55))
+
         y0, plate_h = 1420, 150
         d.rounded_rectangle([80, y0, W - 80, y0 + plate_h], radius=44,
                             fill=PLATE, outline=PLATE_EDGE, width=6)
@@ -277,10 +291,14 @@ def assemble(stock_video, audio_path, captions_path, out_path="final_video.mp4")
                 f"[0:v]{video_filter}[v];"
                 f"[1:a]volume=1.0[a1];"
                 f"[2:a]volume={config.MUSIC_VOLUME}[a2];"
-                f"[a1][a2]amix=inputs=2:duration=first:dropout_transition=0:normalize=0[aout]"
+                f"[a1][a2]amix=inputs=2:duration=first:dropout_transition=0:normalize=0,"
+                f"loudnorm=I=-14:TP=-1.5:LRA=11[aout]"
             )
         else:
-            fc = f"[0:v]{video_filter}[v];[1:a]anull[aout]"
+            fc = (
+                f"[0:v]{video_filter}[v];"
+                f"[1:a]loudnorm=I=-14:TP=-1.5:LRA=11[aout]"
+            )
         cmd += [
             "-filter_complex", fc,
             "-map", "[v]", "-map", "[aout]",
