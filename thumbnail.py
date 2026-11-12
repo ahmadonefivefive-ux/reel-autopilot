@@ -1,29 +1,40 @@
 """
 Thumbnail generator.
 
-Uses the first frame of the finished video as a blurred background, then
-draws a short, bold title on top. 1280x720 is the size YouTube expects for
-custom thumbnails.
+Brand-locked to the video art: same parchment, charcoal ink and old-gold
+accent as every scene, so the channel grid looks like one product.
+1280x720 is the size YouTube expects for custom thumbnails.
 
 Output: thumbnail.jpg
 """
 
 import json
 import os
-import subprocess
 
-from PIL import Image, ImageDraw, ImageFilter, ImageFont
+from PIL import Image, ImageDraw
 
 W, H = 1280, 720
 
+CHARCOAL = (43, 33, 24)
+CHARCOAL_SOFT = (66, 53, 40)
+GOLD = (184, 134, 11)
+PARCH_TOP = (245, 230, 200)
+PARCH_BOT = (226, 206, 162)
+PLATE = (28, 21, 15)
 
-def get_font(size):
+HISTORY_FILE = "uploaded_history.json"
+
+
+def get_font(size, bold=True):
     candidates = [
+        "C:/Windows/Fonts/impact.ttf",
+        "C:/Windows/Fonts/arialbd.ttf",
         "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
         "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
-        "/System/Library/Fonts/Supplemental/Arial Bold.ttf",
-        "C:\\Windows\\Fonts\\arialbd.ttf",
     ]
+    if not bold:
+        candidates.insert(0, "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf")
+    from PIL import ImageFont
     for path in candidates:
         try:
             return ImageFont.truetype(path, size)
@@ -32,33 +43,33 @@ def get_font(size):
     return ImageFont.load_default()
 
 
-def background():
-    if os.path.exists("final_video.mp4"):
-        try:
-            subprocess.run(
-                ["ffmpeg", "-y", "-i", "final_video.mp4", "-frames:v", "1", "thumb_bg.jpg"],
-                check=True,
-                capture_output=True,
-            )
-            img = Image.open("thumb_bg.jpg").convert("RGB").resize((W, H))
-            img = img.filter(ImageFilter.GaussianBlur(12))
-            dark = Image.new("RGB", (W, H), (0, 0, 0))
-            return Image.blend(img, dark, 0.55)
-        except Exception as e:
-            print(f"  [!] Could not use video frame for background: {e}")
+def episode_number():
+    if not os.path.exists(HISTORY_FILE):
+        return 1
+    try:
+        with open(HISTORY_FILE, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        episodes = [d.get("episode") for d in data if isinstance(d.get("episode"), int)]
+        return (max(episodes) if episodes else len(data)) + 1
+    except Exception:
+        return 1
 
-    img = Image.new("RGB", (W, H), (10, 10, 18))
+
+def parchment():
+    img = Image.new("RGB", (W, H))
     draw = ImageDraw.Draw(img)
     for y in range(H):
-        shade = int(18 + 45 * (y / H))
-        draw.line([(0, y), (W, y)], fill=(shade, shade // 3, 120))
+        t = y / H
+        color = tuple(
+            int(PARCH_TOP[i] + (PARCH_BOT[i] - PARCH_TOP[i]) * t) for i in range(3)
+        )
+        draw.line([(0, y), (W, y)], fill=color)
     return img
 
 
-def wrap_title(title, max_chars=18):
+def wrap_title(title, max_chars):
     words = title.upper().split()
-    lines = []
-    current = ""
+    lines, current = [], ""
     for word in words:
         candidate = (current + " " + word).strip()
         if len(candidate) <= max_chars:
@@ -69,33 +80,56 @@ def wrap_title(title, max_chars=18):
             current = word
     if current:
         lines.append(current)
-    return lines[:4]
+    return lines[:3]
 
 
 def make_thumbnail(title, out_path="thumbnail.jpg"):
-    img = background()
+    img = parchment()
     draw = ImageDraw.Draw(img)
 
-    lines = wrap_title(title)
-    font_size = 110 if len(lines) <= 2 else 86
-    font = get_font(font_size)
-    line_height = int(font_size * 1.15)
-    total_height = line_height * len(lines)
-    y = max(60, (H - total_height) // 2)
+    # double frame: charcoal outer, gold inner
+    draw.rectangle([18, 18, W - 18, H - 18], outline=CHARCOAL, width=8)
+    draw.rectangle([38, 38, W - 38, H - 38], outline=GOLD, width=3)
+
+    # top-left kicker
+    kicker = get_font(30)
+    draw.text((70, 62), "FORGOTTEN  EMPIRES", font=kicker, fill=CHARCOAL_SOFT)
+    ep = episode_number()
+    ep_text = f"EPISODE  {ep:02d}"
+    ep_w = draw.textlength(ep_text, font=kicker)
+    draw.text((W - 70 - ep_w, 62), ep_text, font=kicker, fill=GOLD)
+
+    # title block, vertically centred, shrunk until it fits the frame
+    lines = wrap_title(title, 20)
+    size = 132
+    while size > 56:
+        font = get_font(size)
+        if max(draw.textlength(line, font=font) for line in lines) <= W - 180:
+            break
+        size -= 6
+    font = get_font(size)
+
+    heights = []
+    for line in lines:
+        bbox = draw.textbbox((0, 0), line, font=font)
+        heights.append(bbox[3] - bbox[1])
+    total = sum(heights) + int(size * 0.18) * (len(lines) - 1)
+    y = (H - total) // 2 - 10
 
     for line in lines:
         bbox = draw.textbbox((0, 0), line, font=font)
         text_w = bbox[2] - bbox[0]
-        x = (W - text_w) // 2
+        x = max(70, (W - text_w) // 2)
+        # hard ink shadow, then the ink itself
+        draw.text((x + 5, y + 5), line, font=font, fill=PARCH_BOT)
+        draw.text((x, y), line, font=font, fill=CHARCOAL)
+        y += (bbox[3] - bbox[1]) + int(size * 0.18)
 
-        for dx in range(-4, 5):
-            for dy in range(-4, 5):
-                if dx or dy:
-                    draw.text((x + dx, y + dy), line, font=font, fill=(0, 0, 0))
-        draw.text((x, y), line, font=font, fill=(255, 255, 255))
-        y += line_height
+    # gold rule under the title
+    draw.rectangle([70, H - 132, 70 + 190, H - 122], fill=GOLD)
+    tagline = get_font(28, bold=False)
+    draw.text((70, H - 104), "ONE FORGOTTEN EMPIRE, EVERY DAY", font=tagline, fill=CHARCOAL_SOFT)
 
-    draw.rectangle([0, H - 16, W, H], fill=(37, 99, 235))
     img.save(out_path, quality=95)
     return out_path
 
