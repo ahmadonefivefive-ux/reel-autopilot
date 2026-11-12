@@ -324,37 +324,6 @@ def doodle(img, kind):
         d.polygon([(cx - 480, ground - 430), (cx - 430, ground - 430), (cx - 430, ground - 300)], fill=CHARCOAL_SOFT)
         d.polygon([(cx + 480, ground - 430), (cx + 430, ground - 430), (cx + 430, ground - 300)], fill=CHARCOAL_SOFT)
 
-    elif kind == "troops":
-        rng = random.Random(23)
-        PINK = (235, 130, 180)
-        GREEN = (72, 105, 62)
-        DARK = (45, 35, 30)
-        # left army - the big host (crescents of soldiers in cerise dots)
-        for col in range(7):
-            x = 55 + col * 88 + rng.randint(-10, 10)
-            for row in range(0, 9):
-                y = ground - 35 - row * 98 + rng.randint(-10, 10)
-                if y > ground - 20 or x > cx - 30:
-                    continue
-                r = 23 + rng.randint(-3, 3)
-                d.ellipse([x - r, y - r, x + r, y + r], fill=PINK, outline=CHARCOAL, width=3)
-        # right army - darker green wall
-        for col in range(6):
-            x = W - 55 - col * 88 + rng.randint(-10, 10)
-            for row in range(0, 7):
-                y = ground - 35 - row * 98 + rng.randint(-10, 10)
-                if y > ground - 20 or x < cx + 30:
-                    continue
-                r = 19 + rng.randint(-3, 3)
-                fill = DARK if (col + row) % 3 == 0 else GREEN
-                d.ellipse([x - r, y - r, x + r, y + r], fill=fill, outline=CHARCOAL, width=3)
-        # front line ripple across the middle
-        for y in range(ground - 55, ground - 780, 28):
-            d.line([(cx - 16, y), (cx + 16, y)], fill=CHARCOAL_SOFT, width=4)
-        # generals
-        stick(d, 70, ground - 130, 0.6, "pointing", stroke=9)
-        stick(d, W - 70, ground - 130, 0.6, "sword", stroke=9)
-
     elif kind == "campaignmap":
         # wash: whole canvas is water (greenish-grey map parchment)
         d.rectangle([0, 0, W, H], fill=(185, 200, 190))
