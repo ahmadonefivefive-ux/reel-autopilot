@@ -15,6 +15,7 @@ import json
 import os
 import pickle
 import sys
+import time
 from datetime import datetime, timezone
 
 from google.auth.transport.requests import Request
@@ -24,6 +25,8 @@ from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
 
 from topics_util import DuplicateChecker
+
+import config
 
 SCOPES = ["https://www.googleapis.com/auth/youtube.upload"]
 TOKEN_FILE = "token.pickle"
@@ -150,9 +153,27 @@ def save_history(history):
         json.dump(history, f, indent=2, ensure_ascii=False)
 
 
-def already_uploaded(topic, title):
-    history = load_history()
+def next_episode_number(history):
+    """Episodes count up forever, even if a run fails. Never reused."""
+    episodes = [h.get("episode") for h in history if isinstance(h.get("episode"), int)]
+    return (max(episodes) if episodes else len(history)) + 1
 
+
+def build_description(body, episode):
+    """One consistent description template on every upload."""
+    parts = []
+    body = (body or "").strip()
+    if body:
+        parts.append(body)
+    parts.append(f"Episode {episode} - {config.CHANNEL_NAME.title()}")
+    parts.append(config.CHANNEL_CTA)
+    parts.append(config.CHANNEL_HASHTAGS)
+    return "\n\n".join(parts)
+
+
+def already_uploaded(topic, title, history=None):
+    if history is None:
+        history = load_history()
     topic_checker = DuplicateChecker(
         [h.get("topic", "") for h in history if h.get("topic")]
     )
@@ -198,6 +219,8 @@ def upload_video(youtube, video_path, thumbnail_path, title, description, tags):
             "description": description,
             "tags": tags,
             "categoryId": "27",  # Education
+            "defaultLanguage": "en",
+            "defaultAudioLanguage": "en",
         },
         "status": {
             "privacyStatus": "public",
@@ -205,14 +228,27 @@ def upload_video(youtube, video_path, thumbnail_path, title, description, tags):
         },
     }
 
-    media = MediaFileUpload(video_path, chunksize=-1, resumable=True)
-    request = youtube.videos().insert(
-        part="snippet,status", body=body, media_body=media
-    )
-
     print("Uploading video...")
-    response = request.execute()
-    video_id = response["id"]
+    video_id = None
+    last_error = None
+    for attempt in range(3):
+        try:
+            media = MediaFileUpload(video_path, chunksize=-1, resumable=True)
+            request = youtube.videos().insert(
+                part="snippet,status", body=body, media_body=media
+            )
+            response = request.execute()
+            video_id = response["id"]
+            break
+        except Exception as e:
+            last_error = e
+            print(f"  [!] Upload attempt {attempt + 1} failed: {e}")
+            if attempt < 2:
+                time.sleep(20 * (attempt + 1))
+
+    if not video_id:
+        raise RuntimeError(f"Upload failed 3 times: {last_error}")
+
     print(f"Uploaded! https://youtube.com/shorts/{video_id}")
 
     try:
@@ -245,13 +281,17 @@ def main():
     title = clean_title(data["title"])
     topic = data.get("source_topic", "")
 
-    if already_uploaded(topic, title):
+    history = load_history()
+
+    if already_uploaded(topic, title, history):
         print("This topic/title is already in uploaded_history.json. Skipping duplicate.")
         return
 
-    description = data.get("description", "").strip()
+    episode = next_episode_number(history)
+    description = build_description(data.get("description", ""), episode)
     if "#Shorts" not in description:
         description = description.rstrip() + " #Shorts"
+    print(f"Publishing as Episode {episode}.")
 
     tags = data.get("tags") or [
         "history", "historyfacts", "ancienthistory", "islamic history",
@@ -296,6 +336,7 @@ def main():
         "topic": topic,
         "title": title,
         "video_id": video_id,
+        "episode": episode,
         "uploaded_at": datetime.now(timezone.utc).isoformat(),
     })
     save_history(history)
