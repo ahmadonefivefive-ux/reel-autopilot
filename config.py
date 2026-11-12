@@ -29,6 +29,17 @@ MUSIC_VOLUME = 0.08
 # How many different Pexels clips to use per video.
 CLIP_COUNT = 4
 
+# Channel identity. Used in titles, descriptions, thumbnails and end cards.
+CHANNEL_NAME = "FORGOTTEN EMPIRES"
+CHANNEL_HANDLE = "@ForgottenEmpires"
+CHANNEL_CTA = (
+    "One forgotten empire every day at 12 PM ET. "
+    "Subscribe so the next one finds you."
+)
+
+# Hashtags appended to every description (YouTube shows the first 3 above the title).
+CHANNEL_HASHTAGS = "#history #historyshorts #ancienthistory #islamichistory #worldhistory"
+
 # Channel style — applied to EVERY video so the channel feels identical each time.
 GRADE_FILTER = "eq=saturation=0.88:gamma=1.03:contrast=0.98,vignette=angle=PI/4.5"
 WATERMARK = "FORGOTTEN EMPIRES"
