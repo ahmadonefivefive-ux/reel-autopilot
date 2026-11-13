@@ -70,3 +70,42 @@ python run_pipeline.py
 
 Needs `ffmpeg` and `ffprobe` on PATH. The finished `final_video.mp4` stays in
 the folder if you run it locally.
+
+## The weekly long-form branch
+
+Separate pipeline, separate workflow, separate ledgers — the daily Shorts never
+touch it.
+
+| | Shorts | Full story |
+|---|---|---|
+| Length | 35-50 s | 6-10 min |
+| Frame | 1080x1920 | 1920x1080 |
+| Schedule | daily 17:00 UTC (12 PM ET) | **every Sunday 15:00 UTC (10 AM ET)** |
+| Workflow | `pipeline.yml` | `longform.yml` |
+| State | `used_topics.json`, `uploaded_history.json` | `longform_used.json`, `longform_history.json` |
+| Topic pool | `topic_pool.json` (120) | `longform_topics.json` (50) |
+
+What each long-form run does:
+
+1. `longform_script.py` — next unused topic in strict list order; Gemini writes a
+   950-1450 word, 5-8 chapter, 26-40 scene documentary script. Rejects anything
+   short, chapter-less, or under 900 words. No fallback.
+2. `voiceover.py` — same Christopher voice, same word timings (passes its own
+   file names, so Shorts defaults stay untouched).
+3. `longform_video.py` — wide parchment page: framed art panel on the left,
+   chapter tag + headline + one-line chapter note on the right, karaoke captions
+   along the bottom, loudness -14 LUFS, subscribe end card on the last scene.
+   Writes `longform_chapters.json` from real scene timings.
+4. `longform_thumbnail.py` — 1280x720 brand thumbnail: punchy title + art stamp.
+5. `longform_upload.py` — Drive relay (stash → YouTube → **delete from Drive**),
+   chapter timestamps in the description, own episode counter.
+   Refuses to publish if a chapter list is invalid or the script is a fallback.
+
+Run it locally with:
+
+```bash
+python run_longform.py
+```
+
+Adding topics: append to `longform_topics.json`. The fuzzy matcher skips a topic
+that reads too much like an earlier one, so keep them genuinely distinct.
