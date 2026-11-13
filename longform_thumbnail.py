@@ -115,7 +115,7 @@ def make_thumbnail(title, draw_kind="banner", out_path="longform_thumbnail.jpg")
 
     # art stamp on the right, cropped to the drawn content
     art = render_scene(draw_kind, seed=97)
-    art = art.crop((60, 430, 1020, 1390))
+    art = art.crop((60, 372, 1020, 1332))
     stamp = 400
     art = art.resize((stamp, stamp), Image.LANCZOS)
     sx, sy = W - 70 - stamp, 120
