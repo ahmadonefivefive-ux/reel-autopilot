@@ -33,18 +33,29 @@ def load_text(path="script.json"):
 async def edge_voiceover(text, out_file=OUTPUT_FILE, boundaries_file=BOUNDARIES_FILE):
     import edge_tts
 
-    communicate = edge_tts.Communicate(
-        text,
-        config.EDGE_TTS_VOICE,
-        rate=config.EDGE_TTS_RATE,
-    )
+    # edge-tts >= 7.0 changed the default boundary type from WordBoundary to
+    # SentenceBoundary, which silently dropped all word timings in earlier runs.
+    # Request word-level boundaries explicitly; tolerate older versions.
+    try:
+        communicate = edge_tts.Communicate(
+            text,
+            config.EDGE_TTS_VOICE,
+            rate=config.EDGE_TTS_RATE,
+            boundary="WordBoundary",
+        )
+    except TypeError:
+        communicate = edge_tts.Communicate(
+            text,
+            config.EDGE_TTS_VOICE,
+            rate=config.EDGE_TTS_RATE,
+        )
 
     boundaries = []
     with open(out_file, "wb") as f:
         async for chunk in communicate.stream():
             if chunk["type"] == "audio":
                 f.write(chunk["data"])
-            elif chunk["type"] == "WordBoundary":
+            elif chunk["type"] in ("WordBoundary", "SentenceBoundary"):
                 # edge-tts uses 100-nanosecond units
                 boundaries.append({
                     "text": chunk["text"],
@@ -90,15 +101,22 @@ def main(argv=None):
         os.remove(boundaries_file)
 
     print("Generating voiceover...")
-    try:
-        asyncio.run(edge_voiceover(text, out_file, boundaries_file))
-        check_audio(out_file)
-        print("  [+] Voiceover made with edge-tts.")
-        return
-    except Exception as e:
-        print(f"  [!] edge-tts failed: {e}")
-        print("  [i] Switching to gTTS...")
+    # Retry edge-tts a few times; the service occasionally drops boundaries.
+    for attempt in range(3):
+        try:
+            asyncio.run(edge_voiceover(text, out_file, boundaries_file))
+            check_audio(out_file)
+            if os.path.exists(boundaries_file):
+                print("  [+] Voiceover made with edge-tts.")
+                return
+            raise RuntimeError("edge-tts returned no word timings.")
+        except Exception as e:
+            print(f"  [!] edge-tts attempt {attempt + 1} failed: {e}")
+            if attempt < 2:
+                import time
+                time.sleep(3 * (attempt + 1))
 
+    print("  [i] Switching to gTTS...")
     try:
         gtts_voiceover(text, out_file, boundaries_file)
         check_audio(out_file)
