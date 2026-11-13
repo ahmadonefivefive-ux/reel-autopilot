@@ -1,0 +1,80 @@
+name: Long Form - Full Story (weekly)
+
+# One 6-10 minute episode every 7 days.
+# 15:00 UTC = 10:00 AM US Eastern in winter, 11:00 AM in summer.
+on:
+  schedule:
+    - cron: "0 15 * * 0"   # every Sunday
+  workflow_dispatch: {}
+
+concurrency:
+  group: longform-pipeline
+  cancel-in-progress: false
+
+jobs:
+  make-and-upload-full-story:
+    runs-on: ubuntu-latest
+    # A 10-minute 1080p render needs far more than the Shorts' 30 minutes.
+    timeout-minutes: 90
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install FFmpeg and fonts
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg fonts-dejavu-core
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run long-form pipeline
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
+          YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+          YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
+          DRIVE_REFRESH_TOKEN: ${{ secrets.DRIVE_REFRESH_TOKEN }}
+        run: python3 run_longform.py
+
+      - name: Save long-form state back to the repo
+        if: always()
+        run: |
+          git config user.name "history-shorts-bot"
+          git config user.email "bot@users.noreply.github.com"
+
+          for f in longform_used.json longform_history.json; do
+            if [ -f "$f" ]; then
+              git add "$f"
+            fi
+          done
+
+          if git diff --cached --quiet; then
+            echo "No state changes to commit."
+            exit 0
+          fi
+
+          git commit -m "Update long-form state [skip ci]"
+
+          for attempt in 1 2 3 4 5; do
+            git pull --rebase --autostash origin "${{ github.ref_name }}" || true
+            if git push; then
+              echo "State saved on attempt $attempt."
+              exit 0
+            fi
+            sleep 5
+          done
+
+          echo "::error::Could not save long-form state. Next run could repeat a topic."
+          exit 1
