@@ -40,6 +40,24 @@ CHANNEL_CTA = (
 # Hashtags appended to every description (YouTube shows the first 3 above the title).
 CHANNEL_HASHTAGS = "#history #historyshorts #ancienthistory #islamichistory #worldhistory"
 
+# ---------------------------------------------------------------- long form
+# Weekly 6-10 minute "full story" episodes. Same art, same voice, same brand.
+LF_VIDEO_WIDTH = 1920
+LF_VIDEO_HEIGHT = 1080
+LF_FPS = 30
+LF_CAPTION_FONT_SIZE = 50
+LF_CAPTION_MARGIN_V = 40
+LF_WORDS_PER_LINE = 4
+LF_MUSIC_VOLUME = 0.05
+LF_MIN_WORDS = 900
+LF_MAX_WORDS = 1500
+LF_EPISODE_LABEL = "FULL STORY"
+LF_CTA = (
+    "The full story every Sunday at 10 AM ET. "
+    "Subscribe so the next one finds you."
+)
+LF_HASHTAGS = "#history #documentary #ancienthistory #islamichistory #worldhistory"
+
 # Channel style — applied to EVERY video so the channel feels identical each time.
 GRADE_FILTER = "eq=saturation=0.88:gamma=1.03:contrast=0.98,vignette=angle=PI/4.5"
 WATERMARK = "FORGOTTEN EMPIRES"
